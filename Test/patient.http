@@ -1,0 +1,28 @@
+####### Make Appointment
+
+POST http://localhost:8080/patient/makeAppointment
+Content-Type: application/json
+
+{
+    "type":"Physical",
+    "status":"pending",
+    "doctorID":"6465539dc81287f0c274a0ad"
+
+}
+
+#################### Patient ==> get All Pending Appointments
+GET http://localhost:8080/patient/getAllPendingApp/6465539dc81287f0c274a0ad
+
+
+#######  Make Complaint
+
+POST http://localhost:8080/patient/complaint
+Content-Type: application/json
+
+{
+    "Name":"Ammar Naseer",
+    "email":"UzairNaseer21@gmail.com",
+    "role":"doctor",
+    "description":"website App performance is very low"
+
+}

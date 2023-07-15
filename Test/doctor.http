@@ -1,0 +1,2 @@
+#################### DOCTOR ==> get All Patient
+GET http://localhost:8080/doctor/getAllPatients/643de1dc1574ede74f6ec540
