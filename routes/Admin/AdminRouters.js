@@ -1,6 +1,7 @@
 const express = require("express");
 require("dotenv").config();
 const app = express();
+const argon2 = require('argon2');
 const Admin = require("../../models/AdminModel");
 const bcrypt = require("bcryptjs");
 let jwt = require("jsonwebtoken");
@@ -139,19 +140,18 @@ function verifyToken(req, res, next) {
   }
 }
 
-router.get("/profile",async (req,res,next) =>{
-  try{
+router.get("/profile", async (req, res, next) => {
+  try {
     const email = "admin001@gmail.com";
     const admin = await Admin.findOne({ email });
     res.status(200).json(admin);
-
-  }catch (error) {
+  } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
     }
     next(error);
   }
-})
+});
 
 router.post(
   "/doctor/signup",
@@ -179,6 +179,8 @@ router.post(
       } = req.body;
 
       const adminID = "6463e56b2621ab5034d067d8";
+      const hashedPassword = await argon2.hash(password);
+
 
       const admin = await Admin.findById(adminID);
 
@@ -192,10 +194,9 @@ router.post(
         error.statuscode = 401;
         throw error;
       } else {
-        // const hashpasword = await bcrypt.hash(password, 12);
         const doctor = new Doctor({
           name,
-          password,
+          password:hashedPassword,
           email,
           medicalLicenseNo,
           specialization,
@@ -279,10 +280,9 @@ router.patch("/doctor/update", async (req, res, next) => {
   }
 });
 
-router.get("/doctor/search/:email", async (req,res,next)=>{
-
-  try{
-    const {email} = req.params;
+router.get("/doctor/search/:email", async (req, res, next) => {
+  try {
+    const { email } = req.params;
     const doctor = await Doctor.findOne({ email });
 
     if (!doctor) {
@@ -290,22 +290,19 @@ router.get("/doctor/search/:email", async (req,res,next)=>{
       error.statuscode = 401;
       throw error;
     }
-    
-    res.status(200).json(doctor);
 
+    res.status(200).json(doctor);
   } catch (error) {
     if (!error.statusCode) {
-        error.statusCode = 500;
-      }
-      next(error);
+      error.statusCode = 500;
+    }
+    next(error);
   }
+});
 
-})
-
-router.get("/patient/search/:email", async (req,res,next)=>{
-
-  try{
-    const {email} = req.params;
+router.get("/patient/search/:email", async (req, res, next) => {
+  try {
+    const { email } = req.params;
     const patient = await Patient.findOne({ email });
 
     if (!patient) {
@@ -313,17 +310,15 @@ router.get("/patient/search/:email", async (req,res,next)=>{
       error.statuscode = 401;
       throw error;
     }
-    
-    res.status(200).json(patient);
 
+    res.status(200).json(patient);
   } catch (error) {
     if (!error.statusCode) {
-        error.statusCode = 500;
-      }
-      next(error);
+      error.statusCode = 500;
+    }
+    next(error);
   }
-
-})
+});
 
 router.get("/getAllDoctor/:adminId", verifyToken, async (req, res, next) => {
   try {
@@ -378,7 +373,7 @@ router.post("/patient/signup", async (req, res, next) => {
     const adminID = "6463e56b2621ab5034d067d8";
 
     const admin = await Admin.findById(adminID);
-    const doctor = await Doctor.findById(doctorID);
+    // const doctor = await Doctor.findById(doctorID);
 
     if (!admin) {
       return res.status(404).json({ error: "Admin not found" });
@@ -387,8 +382,8 @@ router.post("/patient/signup", async (req, res, next) => {
 
     if (existingPatient) {
       const error = new Error("This Email Already Exist!!!");
-        error.statuscode = 401;
-        throw error;
+      error.statuscode = 401;
+      throw error;
     } else {
       // const hashpasword = await bcrypt.hash(password, 12);
       const patient = new Patient({
@@ -399,15 +394,15 @@ router.post("/patient/signup", async (req, res, next) => {
         gender,
         phoneNumber,
         adminID: admin._id,
-        doctorID: doctor._id,
+        // doctorID: doctor._id,
       });
 
       const result = await patient.save();
       admin.patients.push(patient._id);
-      doctor.patients.push(patient._id);
+      // doctor.patients.push(patient._id);
+      // await doctor.save();
       await patient.save();
       await admin.save();
-      await doctor.save();
 
       const token = jwt.sign(
         {
@@ -427,7 +422,68 @@ router.post("/patient/signup", async (req, res, next) => {
     next(error);
   }
 });
-router.post("/patient/login", adminController.Patientlogin);
+
+router.post("/patient/login", async (req, res, next) => {
+  const { email } = req.body;
+  try {
+    const patient = await Patient.findOne({ email });
+    if (!patient) {
+      const error = new Error("Patient NOT FOUND.");
+      error.statuscode = 401;
+      throw error;
+    }
+    res.status(200).json({
+      message: "Patient Login sucessful ",
+    });
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+});
+
+router.patch("/patient/Aupdate", async (req, res, next) => {
+  try {
+    const {
+      name,
+      password,
+      email,
+      medical_history,
+      gender,
+      phoneNumber,
+      doctorID,
+    } = req.body;
+
+    const patient = await Patient.findOne({ email });
+    const doctor = await Doctor.findById(doctorID);
+
+    if (!Patient) {
+      const error = new Error("Patient Does not exist!!!");
+      error.statuscode = 401;
+      throw error;
+    } else if (!doctor) {
+      const error = new Error("Doctor Does not exist!!!");
+      error.statuscode = 401;
+      throw error;
+    } else {
+      patient.name = name;
+      patient.password = password;
+      patient.gender = gender;
+      patient.phoneNumber = phoneNumber;
+      patient.medical_history = medical_history;
+    }
+    const result = await patient.save();
+    doctor.patients.push(patient._id);
+    await doctor.save();
+
+    res.status(200).json({ message: "Patient updated ", patient: result });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 router.get("/getAllPatient/:adminId", adminController.getAllPatient);
 router.delete("/patient/delete/:email", adminController.deletePatient);
 

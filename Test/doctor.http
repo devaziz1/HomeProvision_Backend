@@ -1,2 +1,24 @@
+############# Doctor login
+POST http://localhost:8080/doctor/login
+Content-Type: application/json
+
+{
+"email":"uzairiqbal3313@gmail.com",
+"password":"331371"
+}
+
+############# Doctor Schedule
+POST http://localhost:8080/doctor/schedule
+Content-Type: application/json
+
+{
+"email":"uzairiqbal3313@gmail.com",
+"slots":["12:32","345:34","324:234"]
+}
+
+
+
+
+
 #################### DOCTOR ==> get All Patient
 GET http://localhost:8080/doctor/getAllPatients/643de1dc1574ede74f6ec540

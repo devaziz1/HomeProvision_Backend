@@ -1,3 +1,30 @@
+####### Patient SignUp
+
+POST http://localhost:8080/patient/signup
+Content-Type: application/json
+
+{
+     "name":"ALI  Hussan",
+    "password":"87236",
+    "email":"Alihassan23@gmail.com",
+    "medical_history":"Allergic to penicillin",
+    "phoneNumber":"0313648866",
+    "gender":"Male"
+
+}
+
+
+############# Admin login
+POST http://localhost:8080/patient/login
+Content-Type: application/json
+
+{
+"email":"UzairAziz4893@gmail.com",
+"password":"Mypass"
+}
+
+
+
 ####### Make Appointment
 
 POST http://localhost:8080/patient/makeAppointment
