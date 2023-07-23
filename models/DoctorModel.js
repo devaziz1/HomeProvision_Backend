@@ -40,7 +40,8 @@ const doctorSchema=new Schema({
         type:Boolean,
         required:true,
         default:false,
-    }
+    },
+    slots:[String],
     
 });
 module.exports=mongoose.model("Doctor",doctorSchema);

@@ -7,16 +7,18 @@ Content-Type: application/json
 "password":"331371"
 }
 
-############# Doctor Schedule
-POST http://localhost:8080/doctor/schedule
+############# Doctor Update Schedule
+PUT http://localhost:8080/doctor/updateSchedule
 Content-Type: application/json
 
 {
-"email":"uzairiqbal3313@gmail.com",
-"slots":["12:32","345:34","324:234"]
+"email":"newd123@gmail.com",
+"selectedSlots":["1:00 - 1:30 PM"]
 }
 
 
+############# Doctor profile
+GET http://localhost:8080/doctor/profile/newd123@gmail.com
 
 
 
