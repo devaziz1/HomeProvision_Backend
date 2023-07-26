@@ -7,6 +7,7 @@ const bcrypt = require("bcryptjs");
 let jwt = require("jsonwebtoken");
 
 const Doctor = require("../../models/DoctorModel");
+const DoctorAppointments = require("../../models/AppointmentModel");
 const DoctorSchedule = require("../../models/DoctorSchedule");
 const Patient = require("../../models/PatientModel");
 const Complaint = require("../../models/Complaints");
@@ -104,6 +105,26 @@ router.get("/profile/:email", async(req,res,next) =>{
   try{
     const { email } = req.params;
     const doctor = await Doctor.findOne({ email });
+
+    res.json(doctor);
+
+
+  }catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+})
+
+router.get("/appiontments/:email", async(req,res,next) =>{
+  try{
+    const { email } = req.params;
+    const doctor = await DoctorAppointments.find({ doctorEmail: email });
+
+    if (!doctor) {
+      return res.status(404).json({ error: 'Doctor not found' });
+    }
 
     res.json(doctor);
 

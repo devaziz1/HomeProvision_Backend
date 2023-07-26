@@ -16,6 +16,9 @@ Content-Type: application/json
 "selectedSlots":["1:00 - 1:30 PM"]
 }
 
+############# Doctor Get Appiontments
+GET http://localhost:8080/doctor/appiontments/newd123@gmail.com
+
 
 ############# Doctor profile
 GET http://localhost:8080/doctor/profile/newd123@gmail.com

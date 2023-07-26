@@ -9,6 +9,7 @@ let jwt = require("jsonwebtoken");
 const Doctor = require("../../models/DoctorModel");
 const Patient = require("../../models/PatientModel");
 const Complaint = require("../../models/Complaints");
+const Appointment = require("../../models/AppointmentModel");
 
 const adminController = require("../../controller/adminController");
 const { body, validationResult } = require("express-validator");
@@ -81,36 +82,6 @@ router.post("/signup", async (req, res, next) => {
   });
 
 
-//   router.post("/Login", async (req, res, next) => {
-//     console.log(req.body);
-//     const { email,password } = req.body;
-//     try {
-//       const patient = await Patient.findOne({ email });
-//       if (!patient) {
-//         const error = new Error("Doctor could not be found.");
-//         error.statuscode = 401;
-//         throw error;
-//       }
-//       const passwordMatches = await argon2.verify(user.password, password);
-  
-  
-//       if (!passwordMatches) {
-//         const error = new Error("Invalid Password!");
-//         error.statuscode = 401;
-//         throw error;
-//       }
-//       res.status(200).json({
-//         message: "Patient Login sucessfull ",
-//         token,
-//       });
-//     }  catch (error) {
-//         if (!error.statusCode) {
-//           error.statusCode = 500;
-//         }
-//         next(error);
-//       }
-//   });
-
 
   router.post(
     "/login",
@@ -169,5 +140,65 @@ router.post("/signup", async (req, res, next) => {
     }
   );
 
+router.post('/createAppointment' , async (req, res, next)  =>{
+  try{
+    const { email, name, doctorEmail, slot, type , status, createdAt } = req.body;
+    console.log(doctorEmail); 
+        const patient = await Patient.findOne({email});
+        
+        if (!patient) {
+          const error = new Error("Patient Does not exist");
+          error.statuscode = 401;
+          throw error;
+        }
+        const doctor = await Doctor.findOne({email:doctorEmail});
+        if (!doctor) {
+          const error = new Error("Doctor Does not exist");
+          error.statuscode = 401;
+          throw error;
+        }
+        
+       
+          const app = new Appointment({
+            email, name, doctorEmail, slot, type , status, createdAt
+          })
+
+          await app.save();
+
+          res.status(200).json({
+  
+            message: "Appointment created Sucessfully"
+           
+          });
+        
+
+
+  }catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+})
+
+
+
+router.get("/getAllDoctor/:adminId", async (req, res, next) => {
+  try {
+    const { adminId } = req.params;
+
+    const admin = await Admin.findById(adminId).populate("doctors");
+    if (!admin) {
+      return res.status(404).json({ error: "Admin not found" });
+    }
+
+    const doctors = admin.doctors;
+
+    res.status(200).json(doctors);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 module.exports = router;
