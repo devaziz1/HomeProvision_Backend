@@ -25,6 +25,7 @@ email: {
     type: String,
     required: true,
     enum: ["Physical", "Online"],
+    default: "Physical"
   },
   status: {
     type: String,

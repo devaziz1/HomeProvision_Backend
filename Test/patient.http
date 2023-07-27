@@ -28,11 +28,11 @@ POST http://localhost:8080/patient/createAppointment
 Content-Type: application/json
 
 {
-"name":"Aziz Naseer",
-"email":"uzrwewrwer432423@gmail.com",
-"doctorEmail":"newd123@gmail.com",
+"name":"Aziz Uzair",
+"email":"UzairAziz4893@gmail.com",
+"doctorEmail":"example123@gmail.com",
 "slot":"12:00 - 12:30 PM",
-"type":"Physical"
+"createdAt": "2023-07-28"
 }
 
 

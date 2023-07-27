@@ -107,6 +107,7 @@ router.post("/signup", async (req, res, next) => {
   
         const { email, password } = req.body;
         const patient = await Patient.findOne({email});
+        const name = patient.name
         console.log(patient);
         const token = jwt.sign({ patient }, process.env.ACCESS_TOKEN_SECRET, {
           expiresIn: "300s",
@@ -127,6 +128,7 @@ router.post("/signup", async (req, res, next) => {
           }
           res.status(200).json({
             email,
+            name,
             message: "Patient Login sucessfull ",
             token,
           });
@@ -142,7 +144,7 @@ router.post("/signup", async (req, res, next) => {
 
 router.post('/createAppointment' , async (req, res, next)  =>{
   try{
-    const { email, name, doctorEmail, slot, type , status, createdAt } = req.body;
+    const { email, name, doctorEmail, slot,createdAt } = req.body;
     console.log(doctorEmail); 
         const patient = await Patient.findOne({email});
         
@@ -160,10 +162,11 @@ router.post('/createAppointment' , async (req, res, next)  =>{
         
        
           const app = new Appointment({
-            email, name, doctorEmail, slot, type , status, createdAt
+            email, name, doctorEmail, slot, createdAt
           })
 
           await app.save();
+          console.log("Appiontment Done Sucessfully");
 
           res.status(200).json({
   
