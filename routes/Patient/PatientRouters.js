@@ -177,6 +177,10 @@ router.post('/createAppointment' , async (req, res, next)  =>{
 
 
   }catch (error) {
+    if (error.code === 11000) {
+      // Handle duplicate key error (email already exists)
+      res.status(400).json({ error: 'Email already exists in the appointments collection.' });
+    }
     if (!error.statusCode) {
       error.statusCode = 500;
     }

@@ -36,9 +36,9 @@ POST http://localhost:8080/admin/doctor/signup
 Content-Type: application/json
 
 {
-    "name":"Dr.Uzair Iqbal",
+    "name":"Dr.Rohail",
     "password":"331371",
-    "email":"uzairIqbal3313@gmail.com",
+    "email":"Railsa3313@gmail.com",
      "specialization":"Nephrologist",
     "medicalLicenseNo":"723SJQ",
     "gender":"Male",
@@ -60,14 +60,13 @@ PATCH http://localhost:8080/admin/doctor/update
 Content-Type: application/json
 
 {
-   "name":"Dr.Waqas",
-    "password":"doctor7863",
-    "email":"Abdullah372@gmail.com",
-    "specialization":"Nephrologist",
-    "medicalLicenseNo":"723SJQ",
-    "gender":"Male",
-    "phoneNumber":"012872621431",
-    "adminID":"6463e56b2621ab5034d067d8"
+  "name":"Dr.Rohaill",
+    "password":"331371",
+    "email":"Rohail09@gmail.com",
+     "specialization":"Nephrologist",
+    "medicalLicenseNo":"723",
+    "gender":"Malee",
+    "phoneNumber":"012872621431"
 
 }
 

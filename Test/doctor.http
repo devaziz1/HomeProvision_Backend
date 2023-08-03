@@ -13,7 +13,7 @@ Content-Type: application/json
 
 {
 "email":"newd123@gmail.com",
-"selectedSlots":["1:00 - 1:30 PM"]
+"selectedSlots":["1:00 - 1:30 PM","9:00 - 1:30 AM","9:30 - 10:00 AM","11:00 - 11:30 AM"]
 }
 
 ############# Doctor Get Appiontments

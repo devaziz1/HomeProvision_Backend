@@ -9,12 +9,13 @@ const AppointmentSchema = new Schema({
 email: {
     type: String,
     required: true,
-    unique: true,
+    unique:true,
     match: [gmailRegex, 'Please enter a valid Gmail address']
   },
   doctorEmail: {
     type: String,
     required: true,
+    unique:true,
     match: [gmailRegex, 'Please enter a valid Gmail address']
   },
   slot:{
@@ -37,4 +38,7 @@ email: {
     default: () => Date.now(),
   }
 });
+
+
+
 module.exports = mongoose.model("Appointment", AppointmentSchema);

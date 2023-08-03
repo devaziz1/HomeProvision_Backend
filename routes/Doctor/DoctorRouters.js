@@ -91,8 +91,6 @@ router.put("/updateSchedule", async (req, res, next) => {
 
     return res.status(200).json({ message: 'Doctor slots updated successfully' });
 
-
-    res.json(schedule);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
