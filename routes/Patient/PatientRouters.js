@@ -208,4 +208,30 @@ router.get("/getAllDoctor/:adminId", async (req, res, next) => {
   }
 });
 
+router.post("/submitComplaint",async (req, res , next) =>{
+  try{
+    const {email, description} = req.body;
+
+    const complaint = new Complaint({
+      email,
+      
+      description
+    })
+
+    await complaint.save();
+    res.status(200).json({
+  
+      message: "Complaint submitted successfully"
+     
+    });
+
+    
+  }catch (error) {
+        if (!error.statusCode) {
+          error.statusCode = 500;
+        }
+        next(error);
+      }
+})
+
 module.exports = router;

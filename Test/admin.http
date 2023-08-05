@@ -38,7 +38,7 @@ Content-Type: application/json
 {
     "name":"Dr.Rohail",
     "password":"331371",
-    "email":"Railsa3313@gmail.com",
+    "email":"Raisa3313@gmail.com",
      "specialization":"Nephrologist",
     "medicalLicenseNo":"723SJQ",
     "gender":"Male",
@@ -110,8 +110,7 @@ Content-Type: application/json
     "email":"IeSAsa21@gmail.com",
     "medical_history":"Allergic to penicillin",
     "phoneNumber":"0313648866",
-    "gender":"Male",
-    "doctorID":"64b508be99c753ead76d42ce"
+    "gender":"Malee"
 
 }
 
@@ -123,7 +122,10 @@ DELETE  http://localhost:8080/admin/patient/delete/AzizNaseer231@gmail.com
 
 
 #################### View All complaints
-GET http://localhost:8080/admin/getAllComplaints
+GET http://localhost:8080/admin/getAllCompaint
+
+#################### GET COMPLANIT BODY
+GET http://localhost:8080/admin/getComplaintBody/64cc19fd174065ba4925fe7a
 
 
 ############# Cookies Request
@@ -135,6 +137,9 @@ Content-Type: application/json
 "password":"SE7"
 }
 
+
+##################### delete Complaint
+DELETE  http://localhost:8080/admin/deleteComplaint/UzairNaseer@gmail.com
 
 ############# Admin create session
 POST http://localhost:8080/admin/createSession

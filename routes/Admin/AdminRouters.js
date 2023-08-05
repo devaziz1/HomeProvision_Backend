@@ -353,6 +353,23 @@ router.get("/getAllDoctor/:adminId", verifyToken, async (req, res, next) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+router.get("/getComplaintBody/:_id", async (req, res, next)=>{
+  try{
+    const {_id} = req.params;
+    const complaint = await Complaint.findById(_id);
+
+    if (!complaint) {
+      return res.status(404).json({ error: "Complaint Does Not Found" });
+    }
+    return res.status(200).json({
+      complaint
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+})
 
 router.delete("/doctor/delete/:email", async (req, res, next) => {
   const { email } = req.params;
@@ -467,19 +484,13 @@ router.patch("/patient/Aupdate", async (req, res, next) => {
       email,
       medical_history,
       gender,
-      phoneNumber,
-      doctorID,
+      phoneNumber
     } = req.body;
 
     const patient = await Patient.findOne({ email });
-    const doctor = await Doctor.findById(doctorID);
 
     if (!Patient) {
       const error = new Error("Patient Does not exist!!!");
-      error.statuscode = 401;
-      throw error;
-    } else if (!doctor) {
-      const error = new Error("Doctor Does not exist!!!");
       error.statuscode = 401;
       throw error;
     } else {
@@ -490,16 +501,45 @@ router.patch("/patient/Aupdate", async (req, res, next) => {
       patient.medical_history = medical_history;
     }
     const result = await patient.save();
-    doctor.patients.push(patient._id);
-    await doctor.save();
-
-    res.status(200).json({ message: "Patient updated ", patient: result });
+     res.status(200).json({ message: "Patient updated ", patient: result });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });
   }
 });
 
+
+router.get("/getAllCompaint", async(req,res,next)=>{
+  try{
+    const complaints = await Complaint.find();
+    res.status(200).json(complaints);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+})
+
+router.delete("/deleteComplaint/:email", async(req, res, next) =>{
+  try{
+    const {email} = req.params;
+    const compaint = Complaint.findOneAndDelete({ email });
+
+    if (!compaint) {
+      const error = new Error("Complaint does not found.");
+      error.statuscode = 401;
+      throw error;
+    }
+
+    res.status(200).json({ message: "Compaint deleted sucessful" });
+
+    console.log("Complaint Deleted");
+
+  }
+  catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+})
 router.get("/getAllPatient/:adminId", adminController.getAllPatient);
 router.delete("/patient/delete/:email", adminController.deletePatient);
 

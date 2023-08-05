@@ -54,13 +54,11 @@ GET http://localhost:8080/patient/getAllPendingApp/6465539dc81287f0c274a0ad
 
 #######  Make Complaint
 
-POST http://localhost:8080/patient/complaint
+POST http://localhost:8080/patient/submitComplaint
 Content-Type: application/json
 
 {
-    "Name":"Ammar Naseer",
-    "email":"UzairNaseer21@gmail.com",
-    "role":"doctor",
-    "description":"website App performance is very low"
+    "email":"UzairNaseer@gmail.com",
+    "description":"website App performance is very low object ID"
 
 }
