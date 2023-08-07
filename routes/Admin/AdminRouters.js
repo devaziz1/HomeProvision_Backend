@@ -519,25 +519,41 @@ router.get("/getAllCompaint", async(req,res,next)=>{
   }
 })
 
-router.delete("/deleteComplaint/:email", async(req, res, next) =>{
+router.delete("/deleteComplaint/:_id", async(req, res, next) =>{
   try{
-    const {email} = req.params;
-    const compaint = Complaint.findOneAndDelete({ email });
+    const {_id} = req.params;
+    const complaint = await Complaint.findByIdAndDelete(_id);
 
-    if (!compaint) {
-      const error = new Error("Complaint does not found.");
-      error.statuscode = 401;
-      throw error;
+    if (complaint) {
+      res.status(200).json({ message: "Compaint deleted sucessful" });
+      console.log("Complaint Deleted");
+
     }
-
-    res.status(200).json({ message: "Compaint deleted sucessful" });
-
-    console.log("Complaint Deleted");
-
   }
   catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.get("/searchCom/:email",async(req,res,next)=>{
+  try{
+    const { email } = req.params;
+
+    const complaint = await Complaint.find({ email });
+
+    if(complaint.length === 0){
+      const error = new Error("Please Provide Valid Email");
+        error.statuscode = 401;
+        throw error;
+    }
+    res.status(200).json(complaint);
+
+
+
+  }catch (error) {
+    console.error(error);
+    res.status(error.statuscode || 500).json({ error: error.message || "Server error" });
   }
 })
 router.get("/getAllPatient/:adminId", adminController.getAllPatient);

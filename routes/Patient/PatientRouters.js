@@ -210,11 +210,11 @@ router.get("/getAllDoctor/:adminId", async (req, res, next) => {
 
 router.post("/submitComplaint",async (req, res , next) =>{
   try{
-    const {email, description} = req.body;
+    const {email, description, complainer } = req.body;
 
     const complaint = new Complaint({
       email,
-      
+      complainer,
       description
     })
 

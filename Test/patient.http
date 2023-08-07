@@ -58,7 +58,8 @@ POST http://localhost:8080/patient/submitComplaint
 Content-Type: application/json
 
 {
-    "email":"UzairNaseer@gmail.com",
-    "description":"website App performance is very low object ID"
+    "email":"UzairNaseer123@gmail.com",
+    "description":"website 66 performance is very low frontend",
+    "compainner":"Patient"
 
 }

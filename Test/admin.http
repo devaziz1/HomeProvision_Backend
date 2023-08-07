@@ -128,6 +128,12 @@ GET http://localhost:8080/admin/getAllCompaint
 GET http://localhost:8080/admin/getComplaintBody/64cc19fd174065ba4925fe7a
 
 
+##################### delete complaint
+DELETE  http://localhost:8080/admin/deleteComplaint/64ceb99c18892214ae92bde7
+
+############# Admin Search complaint
+GET http://localhost:8080/admin/searchCom/UzairNase3@gmail.com
+
 ############# Cookies Request
 POST http://localhost:8080
 Content-Type: application/json
