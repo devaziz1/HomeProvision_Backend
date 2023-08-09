@@ -234,4 +234,34 @@ router.post("/submitComplaint",async (req, res , next) =>{
       }
 })
 
+router.post("/submitFeedback",async (req,res, next)=>{
+  try{
+    const {doctorEmail, rating , feedback} = req.body;
+    const doctor = await Doctor.findOne({email : doctorEmail});
+
+    if(!doctor){
+      const error = new Error("Please Provide Valid Doctor's Email");
+        error.statuscode = 401;
+        throw error;
+    }
+    const currentRating   =   parseFloat(doctor.rating);
+    const currentNumOfRating = parseInt(doctor.numberOfRating);
+
+    const newRating = ((currentRating * currentNumOfRating) + rating) / (currentNumOfRating + 1);
+
+    doctor.rating = Number(newRating.toFixed(1));
+    doctor.numberOfRating ++;
+
+    await doctor.save();
+
+    res.status(200).json(doctor);
+    
+  }catch (error) {
+        if (!error.statusCode) {
+          error.statusCode = 500;
+        }
+        next(error);
+      }
+})
+
 module.exports = router;

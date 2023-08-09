@@ -63,3 +63,14 @@ Content-Type: application/json
     "compainner":"Patient"
 
 }
+
+
+### submit feedback
+POST http://localhost:8080/patient/submitFeedback
+Content-Type: application/json
+
+{
+    "doctorEmail": "example123@gmail.com",
+    "rating" : 1
+
+}
