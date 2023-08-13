@@ -5,6 +5,7 @@ const argon2 = require("argon2");
 const Admin = require("../../models/AdminModel");
 const bcrypt = require("bcryptjs");
 let jwt = require("jsonwebtoken");
+const { format } = require('date-fns');
 
 const Doctor = require("../../models/DoctorModel");
 const DoctorAppointments = require("../../models/AppointmentModel");
@@ -19,6 +20,7 @@ const router = express.Router();
 app.use(express.json());
 
 const doctorController = require("../../controller/doctorController");
+const Prescription = require("../../models/Prescription");
 
 router.post(
   "/login",
@@ -78,19 +80,20 @@ router.post(
 
 router.put("/updateSchedule", async (req, res, next) => {
   try {
-    const { email , selectedSlots } = req.body;
+    const { email, selectedSlots } = req.body;
 
     const doctor = await Doctor.findOne({ email });
 
     if (!doctor) {
-      return res.status(404).json({ error: 'Doctor not found' });
+      return res.status(404).json({ error: "Doctor not found" });
     }
 
     doctor.slots = selectedSlots;
     await doctor.save();
 
-    return res.status(200).json({ message: 'Doctor slots updated successfully' });
-
+    return res
+      .status(200)
+      .json({ message: "Doctor slots updated successfully" });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -99,41 +102,86 @@ router.put("/updateSchedule", async (req, res, next) => {
   }
 });
 
-router.get("/profile/:email", async(req,res,next) =>{
-  try{
+router.get("/profile/:email", async (req, res, next) => {
+  try {
     const { email } = req.params;
     const doctor = await Doctor.findOne({ email });
 
     res.json(doctor);
-
-
-  }catch (error) {
+  } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
     }
     next(error);
   }
-})
+});
 
-router.get("/appiontments/:email", async(req,res,next) =>{
-  try{
+router.get("/appiontments/:email", async (req, res, next) => {
+  try {
     const { email } = req.params;
     const doctor = await DoctorAppointments.find({ doctorEmail: email });
 
     if (!doctor) {
-      return res.status(404).json({ error: 'Doctor not found' });
+      return res.status(404).json({ error: "Doctor not found" });
     }
 
     res.json(doctor);
-
-
-  }catch (error) {
+  } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
     }
     next(error);
   }
-})
+});
+
+router.post("/createPrescription", async (req, res, next) => {
+  try {
+    const {
+      doctorEmail,
+      patientEmail,
+      description,
+      dosage,
+      medicineName,
+      startDate,
+      endDate,
+    } = req.body;
+
+    const doctor = Doctor.findOne({ email: doctorEmail });
+    const patient = Patient.findOne({ email: patientEmail });
+    if (!doctor) {
+      const error = new Error("Provide Valid Doctor's Email");
+      error.statuscode = 401;
+      throw error;
+    }
+    if (!patient) {
+      const error = new Error("Provide Valid Patient's Email");
+      error.statuscode = 401;
+      throw error;
+    }
+
+
+
+    const prescription = new Prescription({
+      doctorEmail,
+      patientEmail,
+      description,
+      dosage,
+      startDate,
+      medicineName,
+      endDate,
+    });
+
+    await prescription.save();
+    return res.status(200).json(prescription);
+
+
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+});
 
 router.get("/getAllPatients/:doctorId", doctorController.getAllPatients);
 

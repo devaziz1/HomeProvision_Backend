@@ -74,3 +74,13 @@ Content-Type: application/json
     "rating" : 1
 
 }
+
+#################### Patient ==> get All Prescriptions
+GET http://localhost:8080/patient/getPrescriptions/UzairAziz4893@gmail.com
+
+
+#################### Patient ==> get  Prescriptions by ID
+GET http://localhost:8080/patient/getPrescriptionsById/64d6b43593b3badb530cf21e
+
+##################### delete Prescription
+DELETE  http://localhost:8080/patient/deletePrescription/64d6b4d193b3badb530cf222

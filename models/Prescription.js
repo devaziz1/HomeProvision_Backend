@@ -1,26 +1,39 @@
 const mongoose=require("mongoose");
 const Schema=mongoose.Schema;
 const PrescriptionSchema=new Schema({
+    doctorEmail:{
+        type:String,
+        required:true
+    },
+    patientEmail:{
+        type:String,
+        required:true,
+    },
     description:{
         type:String,
         required:true,
     },
+    medicineName:{
+        type:String,
+        required:true,
+    },
     dosage:{
-        type:Number,
+        type:String,
+        required:true,
+    },
+    startDate:{
+        type:String,
+        required:true,
+    },
+    endDate:{
+        type:String,
         required:true,
     },
     createdAt: {
         type:Date,
         default : () => Date.now()
     },
-    doctorID: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Doctor',
-      },
-    patientID: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Patient',
-      }  
+     
 });
 module.exports=mongoose.model("Prescription",PrescriptionSchema);
 
