@@ -5,7 +5,7 @@ const argon2 = require("argon2");
 const Admin = require("../../models/AdminModel");
 const bcrypt = require("bcryptjs");
 let jwt = require("jsonwebtoken");
-const { format } = require('date-fns');
+
 
 const Doctor = require("../../models/DoctorModel");
 const DoctorAppointments = require("../../models/AppointmentModel");
