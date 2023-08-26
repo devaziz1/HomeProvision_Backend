@@ -18,14 +18,36 @@ app.use(cors());
 app.use(bodyParser.json());
 
 
-app.use((req, res, next) => {
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "OPTIONS, GET, POST, PUT, PATCH, DELETE"
-  );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  next();
-});
+const allowedOrigins = ["http://localhost:3000", "http://127.0.0.1:5000"];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true,
+}));
+
+
+// app.use((req, res, next) => {
+//   res.setHeader(
+//     "Access-Control-Allow-Methods",
+//     "OPTIONS, GET, POST, PUT, PATCH, DELETE"
+//   );
+//   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+//   next();
+// });
+
+// // Use the cors middleware and allow requests from http://127.0.0.1:5000
+// app.use(cors({
+//   origin: "http://127.0.0.1:5000",
+//   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+//   credentials: true,
+// }));
 
 mongoose
   .connect("mongodb://127.0.0.1:27017/NephrolAI")
