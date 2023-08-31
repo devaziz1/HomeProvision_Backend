@@ -6,6 +6,9 @@ const Admin = require("../../models/AdminModel");
 const bcrypt = require("bcryptjs");
 let jwt = require("jsonwebtoken");
 
+const path = require("path");
+const fs = require("fs");
+
 const Doctor = require("../../models/DoctorModel");
 const Patient = require("../../models/PatientModel");
 const Complaint = require("../../models/Complaints");
@@ -14,6 +17,7 @@ const Prescription = require("../../models/Prescription");
 
 const adminController = require("../../controller/adminController");
 const { body, validationResult } = require("express-validator");
+const PatientReport = require("../../models/PatientReport");
 const router = express.Router();
 
 app.use(express.json());
@@ -305,4 +309,53 @@ router.delete("/deletePrescription/:_id", async(req, res, next) =>{
     res.status(500).json({ error: "Server error" });
   }
 });
+
+
+router.get("/getreports/:email", async (req, res, next) => {
+  try {
+    const email = req.params.email;
+    const reports = await PatientReport.find({ patientEmail: email });
+
+    if (!reports || reports.length === 0) {
+      return res.status(404).json({ message: "Reports not found" });
+    }
+
+    const reportData = reports.map(report => {
+      return {
+        _id: report._id,
+        CreatedAt: report.CreatedAt
+      };
+    });
+
+    res.status(200).json(reportData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.get("/downloadreport/:reportId", async (req, res, next) => {
+  try {
+    const reportId = req.params.reportId;
+
+    // Fetch the report by its ID from the database
+    const report = await PatientReport.findById(reportId);
+
+    if (!report) {
+      return res.status(404).json({ message: "Report not found" });
+    }
+
+    // Set response headers for downloading the PDF
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename=Report_${reportId}.pdf`);
+
+    // Send the PDF file to the client
+    res.send(report.pdfReport);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
 module.exports = router;

@@ -5,16 +5,24 @@ const argon2 = require('argon2');
 const Admin = require("../../models/AdminModel");
 const bcrypt = require("bcryptjs");
 let jwt = require("jsonwebtoken");
+const multer = require('multer');
+
 
 const Doctor = require("../../models/DoctorModel");
 const Patient = require("../../models/PatientModel");
 const Complaint = require("../../models/Complaints");
+const PatientReport = require("../../models/PatientReport");
 
 const adminController = require("../../controller/adminController");
 const { body, validationResult } = require("express-validator");
 const router = express.Router();
 
 app.use(express.json());
+
+
+// Configure multer for file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 router.post("/signup", async (req, res, next) => {
   console.log(req.body);
@@ -552,6 +560,21 @@ router.get("/searchCom/:email",async(req,res,next)=>{
 
 
   }catch (error) {
+    console.error(error);
+    res.status(error.statuscode || 500).json({ error: error.message || "Server error" });
+  }
+})
+
+router.post("/UploadReport", upload.single('pdfFile') ,async (req,res,next) =>{
+  try {
+    const { patientEmail } = req.body;
+    const pdfReport = req.file.buffer;
+
+    const report = new PatientReport({patientEmail,pdfReport});
+    await report.save();
+    res.status(201).json({ message: 'Patient information and PDF uploaded successfully' });
+    
+  } catch (error) {
     console.error(error);
     res.status(error.statuscode || 500).json({ error: error.message || "Server error" });
   }

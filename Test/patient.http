@@ -84,3 +84,7 @@ GET http://localhost:8080/patient/getPrescriptionsById/64d6b43593b3badb530cf21e
 
 ##################### delete Prescription
 DELETE  http://localhost:8080/patient/deletePrescription/64d6b4d193b3badb530cf222
+
+
+#################### Patient ==> get  PDF Reports
+GET http://localhost:8080/patient/getreports/UzairAziz4893@gmail.com
