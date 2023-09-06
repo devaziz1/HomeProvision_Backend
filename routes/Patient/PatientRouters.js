@@ -8,6 +8,8 @@ let jwt = require("jsonwebtoken");
 
 const path = require("path");
 const fs = require("fs");
+const multer = require('multer');
+
 
 const Doctor = require("../../models/DoctorModel");
 const Patient = require("../../models/PatientModel");
@@ -22,63 +24,89 @@ const router = express.Router();
 
 app.use(express.json());
 
-router.post("/signup", async (req, res, next) => {
-  console.log(req.body);
-  try {
-    const { name, email, password, medical_history, gender, phoneNumber } =
-      req.body;
+// Configure multer for file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
-    const adminID = "6463e56b2621ab5034d067d8";
+router.post(
+  "/signup",
+  [
+    body("email")
+      .trim()
+      .notEmpty()
+      .withMessage("Email is required")
+      .isEmail()
+      .withMessage("Enter a valid email")
+      .isLength({ max: 30 })
+      .withMessage("Email length should be less than 30 characters"),
+    body("password").trim().notEmpty().withMessage("Password is required"),
+  ],
+  async (req, res, next) => {
+    console.log(req.body);
+    try {
+      const err = validationResult(req);
+      if (!err.isEmpty()) {
+        const error = new Error("Validation Failed");
+        error.statusCode = 422;
+        error.data = err.array();
+        throw error;
+      }
 
-    const admin = await Admin.findById(adminID);
+      const { name, email, password, medical_history, gender, phoneNumber } =
+        req.body;
 
-    const hashedPassword = await argon2.hash(password);
+      const adminID = "6463e56b2621ab5034d067d8";
 
-    if (!admin) {
-      return res.status(404).json({ error: "Admin not found" });
+      const admin = await Admin.findById(adminID);
+
+      const hashedPassword = await argon2.hash(password);
+
+      if (!admin) {
+        return res.status(404).json({ error: "Admin not found" });
+      }
+      const existingPatient = await Patient.findOne({ email });
+
+      if (existingPatient) {
+        const error = new Error("This Email Already Exist...");
+        error.statuscode = 401;
+        throw error;
+      } else {
+        const patient = new Patient({
+          name,
+          password: hashedPassword,
+          email,
+          medical_history,
+          gender,
+          phoneNumber,
+          adminID: admin._id,
+        });
+
+        const result = await patient.save();
+        admin.patients.push(patient._id);
+        await patient.save();
+        await admin.save();
+
+        const token = jwt.sign(
+          {
+            userId: result._id,
+          },
+          "somth",
+          {
+            expiresIn: "1h",
+          }
+        );
+        res
+          .status(201)
+          .json({ mesg: "Patient created sucess", adminId: result._id });
+      }
+    } catch (error) {
+      if (!error.statusCode) {
+        error.statusCode = 500;
+      }
+      next(error);
     }
-    const existingPatient = await Patient.findOne({ email });
-
-    if (existingPatient) {
-      const error = new Error("This Email Already Exist...");
-      error.statuscode = 401;
-      throw error;
-    } else {
-      const patient = new Patient({
-        name,
-        password: hashedPassword,
-        email,
-        medical_history,
-        gender,
-        phoneNumber,
-        adminID: admin._id,
-      });
-
-      const result = await patient.save();
-      admin.patients.push(patient._id);
-      await patient.save();
-      await admin.save();
-
-      const token = jwt.sign(
-        {
-          userId: result._id,
-        },
-        "somth",
-        {
-          expiresIn: "1h",
-        }
-      );
-      res
-        .status(201)
-        .json({ mesg: "Patient created sucess", adminId: result._id });
-    }
-  } catch (error) {
-    if (!error.statusCode) {
-      error.statusCode = 500;
-    }
-    next(error);
   }
-});
+);
 
 router.post(
   "/login",
@@ -87,6 +115,8 @@ router.post(
       .trim()
       .notEmpty()
       .withMessage("Email is required")
+      .isLength({ max: 30 }) 
+      .withMessage("Email length should be less than 30 characters")
       .isEmail()
       .withMessage("Enter a valid email"),
     body("password").trim().notEmpty().withMessage("Password is required"),
@@ -104,14 +134,13 @@ router.post(
 
       const { email, password } = req.body;
       const patient = await Patient.findOne({ email });
-      const name = patient.name;
       console.log(patient);
       const token = jwt.sign({ patient }, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "300s",
       });
 
       if (!patient) {
-        const error = new Error("Invalid Email!::");
+        const error = new Error("Invalid Email!");
         error.statuscode = 401;
         throw error;
       } else {
@@ -124,7 +153,6 @@ router.post(
         }
         res.status(200).json({
           email,
-          name,
           message: "Patient Login sucessfull ",
           token,
         });
@@ -173,11 +201,9 @@ router.post("/createAppointment", async (req, res, next) => {
   } catch (error) {
     if (error.code === 11000) {
       // Handle duplicate key error (email already exists)
-      res
-        .status(400)
-        .json({
-          error: "Email already exists in the appointments collection.",
-        });
+      res.status(400).json({
+        error: "Email already exists in the appointments collection.",
+      });
     }
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -293,23 +319,20 @@ router.get("/getPrescriptionsById/:_id", async (req, res, next) => {
   }
 });
 
-router.delete("/deletePrescription/:_id", async(req, res, next) =>{
-  try{
-    const {_id} = req.params;
+router.delete("/deletePrescription/:_id", async (req, res, next) => {
+  try {
+    const { _id } = req.params;
     const prescription = await Prescription.findByIdAndDelete(_id);
 
     if (prescription) {
       res.status(200).json({ message: "Prescription deleted sucessful" });
       console.log("prescription Deleted");
-
     }
-  }
-  catch (error) {
+  } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });
   }
 });
-
 
 router.get("/getreports/:email", async (req, res, next) => {
   try {
@@ -320,10 +343,10 @@ router.get("/getreports/:email", async (req, res, next) => {
       return res.status(404).json({ message: "Reports not found" });
     }
 
-    const reportData = reports.map(report => {
+    const reportData = reports.map((report) => {
       return {
         _id: report._id,
-        CreatedAt: report.CreatedAt
+        CreatedAt: report.CreatedAt,
       };
     });
 
@@ -347,7 +370,10 @@ router.get("/downloadreport/:reportId", async (req, res, next) => {
 
     // Set response headers for downloading the PDF
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename=Report_${reportId}.pdf`);
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=Report_${reportId}.pdf`
+    );
 
     // Send the PDF file to the client
     res.send(report.pdfReport);
@@ -357,5 +383,105 @@ router.get("/downloadreport/:reportId", async (req, res, next) => {
   }
 });
 
+router.get("/getProfile/:email", async (req, res, next) => {
+  try {
+    const email = req.params.email;
+
+    console.log("Email " + email);
+
+    // Fetch the report by its ID from the database
+    const profile = await Patient.findOne({ email });
+
+    console.log(profile);
+
+    if (!profile) {
+      return res.status(404).json({ message: "Profile not found" });
+    }
+
+    res.status(200).json(profile);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.patch("/updateProfile", async (req, res, next) => {
+  try {
+    const {
+      name,
+      oldpassword,
+      newPass,
+      email,
+      medical_history,
+      gender,
+      phoneNumber,
+    } = req.body;
+
+    const patient = await Patient.findOne({ email });
+
+    console.log("Old Password " + oldpassword);
+    console.log("New " + newPass);
+
+    if (!Patient) {
+      const error = new Error("Patient Does not exist!!!");
+      error.statuscode = 401;
+      throw error;
+    }
+
+    const passwordMatches = await argon2.verify(patient.password, oldpassword);
+
+    const newPassword = await argon2.hash(newPass);
+
+    if (!passwordMatches) {
+      const error = new Error("Please Enter Correct Password!");
+      error.statuscode = 401;
+      throw error;
+    }
+    patient.name = name;
+    patient.password = newPassword;
+    patient.gender = gender;
+    patient.phoneNumber = phoneNumber;
+    patient.medical_history = medical_history;
+
+    const result = await patient.save();
+    res.status(200).json({ message: "Patient updated ", patient: result });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.get("/appiontments/:email", async (req, res, next) => {
+  try {
+    const { email } = req.params;
+    const patient = await Appointment.find({ email });
+
+    if (!patient) {
+      return res.status(404).json({ error: "Patient not found" });
+    }
+
+    res.json(patient);
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+});
+
+router.post("/UploadReport", upload.single('pdfFile') ,async (req,res,next) =>{
+  try {
+    const { patientEmail,doctorEmail  } = req.body;
+    const pdfReport = req.file.buffer;
+
+    const report = new PatientReport({patientEmail,pdfReport,doctorEmail});
+    await report.save();
+    res.status(201).json({ message: 'Patient information and PDF uploaded successfully' });
+    
+  } catch (error) {
+    console.error(error);
+    res.status(error.statuscode || 500).json({ error: error.message || "Server error" });
+  }
+})
 
 module.exports = router;

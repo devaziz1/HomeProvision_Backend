@@ -20,7 +20,7 @@ Content-Type: application/json
 
 {
 "email":"UzairAziz4893@gmail.com",
-"password":"Mypass"
+"password":"1234"
 }
 
 ############# Create Appointment
@@ -30,7 +30,7 @@ Content-Type: application/json
 {
 "name":" Uzair",
 "email":"UzairAziz4893@gmail.com",
-"doctorEmail":"railsa3313@gmail.com",
+"doctorEmail":"newd123@gmail.com",
 "slot":"1:30 - 2:00 PM",
 "createdAt": "2023-09-30"
 }
@@ -88,3 +88,25 @@ DELETE  http://localhost:8080/patient/deletePrescription/64d6b4d193b3badb530cf22
 
 #################### Patient ==> get  PDF Reports
 GET http://localhost:8080/patient/getreports/UzairAziz4893@gmail.com
+
+
+#################### Patient ==> get  Profile
+GET http://localhost:8080/patient/getProfile/UzairAziz4893@gmail.com
+
+##################### update doctor
+PATCH http://localhost:8080/patient/updateProfile
+Content-Type: application/json
+
+{
+   "name":"Aziz Naseer",
+    "oldpassword":"1234",
+    "newPass":"mypass",
+    "email":"UzairAziz4893@gmail.com",
+    "medical_history":"Allergic to penicillin",
+    "phoneNumber":"0313648866",
+    "gender":"Male"
+
+}
+
+############# Doctor Get Appiontments
+GET http://localhost:8080/patient/appiontments/UzairAziz4893@gmail.com

@@ -6,12 +6,12 @@ const Admin = require("../../models/AdminModel");
 const bcrypt = require("bcryptjs");
 let jwt = require("jsonwebtoken");
 
-
 const Doctor = require("../../models/DoctorModel");
 const DoctorAppointments = require("../../models/AppointmentModel");
 const DoctorSchedule = require("../../models/DoctorSchedule");
 const Patient = require("../../models/PatientModel");
 const Complaint = require("../../models/Complaints");
+const PatientReport = require("../../models/PatientReport");
 
 const adminController = require("../../controller/adminController");
 const { body, validationResult } = require("express-validator");
@@ -159,8 +159,6 @@ router.post("/createPrescription", async (req, res, next) => {
       throw error;
     }
 
-
-
     const prescription = new Prescription({
       doctorEmail,
       patientEmail,
@@ -173,13 +171,35 @@ router.post("/createPrescription", async (req, res, next) => {
 
     await prescription.save();
     return res.status(200).json(prescription);
-
-
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
     }
     next(error);
+  }
+});
+
+router.get("/getreports/:email", async (req, res, next) => {
+  try {
+    const email = req.params.email;
+    const reports = await PatientReport.find({ doctorEmail: email });
+
+    if (!reports || reports.length === 0) {
+      return res.status(404).json({ message: "Reports not found" });
+    }
+
+    const reportData = reports.map((report) => {
+      return {
+        _id: report._id,
+        CreatedAt: report.CreatedAt,
+        patientEmail: report.patientEmail,
+      };
+    });
+
+    res.status(200).json(reportData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
   }
 });
 

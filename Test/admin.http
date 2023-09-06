@@ -36,13 +36,13 @@ POST http://localhost:8080/admin/doctor/signup
 Content-Type: application/json
 
 {
-    "name":"Dr.Rohail",
-    "password":"331371",
-    "email":"Raisa3313@gmail.com",
+    "name":"Dr Rohail",
+    "password":"rohail123",
+    "email":"Rohail09@gmail.com",
      "specialization":"Nephrologist",
-    "medicalLicenseNo":"723SJQ",
+    "medicalLicenseNo":"72132saq",
     "gender":"Male",
-    "phoneNumber":"012872621431"
+    "phoneNumber":"03136444866"
 
 }
 

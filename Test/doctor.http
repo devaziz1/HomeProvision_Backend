@@ -39,3 +39,7 @@ Content-Type: application/json
 
 #################### DOCTOR ==> get All Patient
 GET http://localhost:8080/doctor/getAllPatients/643de1dc1574ede74f6ec540
+
+
+#################### Patient ==> get  PDF Reports
+GET http://localhost:8080/doctor/getreports/newd123@gmail.com

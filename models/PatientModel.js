@@ -5,6 +5,7 @@ const patientSchema=new Schema({
     name:{
         type:String,
         required:true,
+        maxlength: [10, 'Name should not exceed 10 characters']
     },
     email: {
         type: String,

@@ -33,6 +33,7 @@ router.post("/signup", async (req, res, next) => {
       res.status(401).json({ mesg: "This Email Already Exist" });
     } else {
       const hashpasword = await bcrypt.hash(password, 12);
+
       const admin = new Admin({
         name,
         password: hashpasword,
@@ -426,22 +427,23 @@ router.post("/patient/signup", async (req, res, next) => {
       error.statuscode = 401;
       throw error;
     } else {
-      // const hashpasword = await bcrypt.hash(password, 12);
+     
+    const hashpassword = await argon2.hash(password);
+
       const patient = new Patient({
         name,
-        password,
+        password : hashpassword,
         email,
         medical_history,
         gender,
         phoneNumber,
         adminID: admin._id,
-        // doctorID: doctor._id,
+       
       });
 
       const result = await patient.save();
       admin.patients.push(patient._id);
-      // doctor.patients.push(patient._id);
-      // await doctor.save();
+     
       await patient.save();
       await admin.save();
 

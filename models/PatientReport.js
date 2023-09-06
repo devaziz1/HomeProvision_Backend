@@ -4,7 +4,6 @@ const gmailRegex = /^([\w+]+)(.[\w]{1,})?@gmail\.com$/;
 const patientReportSchema=new Schema({
     patientEmail: {
         type: String,
-        required: true,
         match: [gmailRegex, 'Please enter a valid Gmail address']
       },
       pdfReport:{
@@ -13,7 +12,11 @@ const patientReportSchema=new Schema({
       CreatedAt:{
         type:Date,
         default: () => Date.now(),
-      }
+      },
+      doctorEmail: {
+        type: String,
+        match: [gmailRegex, 'Please enter a valid Gmail address']
+      },
       
 });
 module.exports=mongoose.model("PatientReport",patientReportSchema);
