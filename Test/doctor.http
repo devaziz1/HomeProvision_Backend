@@ -43,3 +43,16 @@ GET http://localhost:8080/doctor/getAllPatients/643de1dc1574ede74f6ec540
 
 #################### Patient ==> get  PDF Reports
 GET http://localhost:8080/doctor/getreports/newd123@gmail.com
+
+
+############# Provide Feedback
+POST http://localhost:8080/doctor/provideFeedback
+Content-Type: application/json
+
+{
+"doctorEmail":"newd123@gmail.com",
+"patientEmail":"UzairAziz4893@gmail.com",
+"description": "Feedback from doctor",
+"reportID":"032"
+
+}

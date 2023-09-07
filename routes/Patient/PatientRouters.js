@@ -8,14 +8,14 @@ let jwt = require("jsonwebtoken");
 
 const path = require("path");
 const fs = require("fs");
-const multer = require('multer');
-
+const multer = require("multer");
 
 const Doctor = require("../../models/DoctorModel");
 const Patient = require("../../models/PatientModel");
 const Complaint = require("../../models/Complaints");
 const Appointment = require("../../models/AppointmentModel");
 const Prescription = require("../../models/Prescription");
+const Feedback = require("../../models/FeedbackModel");
 
 const adminController = require("../../controller/adminController");
 const { body, validationResult } = require("express-validator");
@@ -36,9 +36,7 @@ router.post(
       .notEmpty()
       .withMessage("Email is required")
       .isEmail()
-      .withMessage("Enter a valid email")
-      .isLength({ max: 30 })
-      .withMessage("Email length should be less than 30 characters"),
+      .withMessage("Enter a valid email"),
     body("password").trim().notEmpty().withMessage("Password is required"),
   ],
   async (req, res, next) => {
@@ -115,8 +113,6 @@ router.post(
       .trim()
       .notEmpty()
       .withMessage("Email is required")
-      .isLength({ max: 30 }) 
-      .withMessage("Email length should be less than 30 characters")
       .isEmail()
       .withMessage("Enter a valid email"),
     body("password").trim().notEmpty().withMessage("Password is required"),
@@ -433,9 +429,8 @@ router.patch("/updateProfile", async (req, res, next) => {
     const newPassword = await argon2.hash(newPass);
 
     if (!passwordMatches) {
-      const error = new Error("Please Enter Correct Password!");
-      error.statuscode = 401;
-      throw error;
+      return res.status(401).json({ error: "Provide Correct Password" });
+      
     }
     patient.name = name;
     patient.password = newPassword;
@@ -469,19 +464,75 @@ router.get("/appiontments/:email", async (req, res, next) => {
   }
 });
 
-router.post("/UploadReport", upload.single('pdfFile') ,async (req,res,next) =>{
-  try {
-    const { patientEmail,doctorEmail  } = req.body;
-    const pdfReport = req.file.buffer;
+router.post(
+  "/UploadReport",
+  upload.single("pdfFile"),
+  async (req, res, next) => {
+    try {
+      const { patientEmail, doctorEmail } = req.body;
+      const pdfReport = req.file.buffer;
 
-    const report = new PatientReport({patientEmail,pdfReport,doctorEmail});
-    await report.save();
-    res.status(201).json({ message: 'Patient information and PDF uploaded successfully' });
-    
+      const report = new PatientReport({
+        patientEmail,
+        pdfReport,
+        doctorEmail,
+      });
+      await report.save();
+      res
+        .status(201)
+        .json({ message: "Patient information and PDF uploaded successfully" });
+    } catch (error) {
+      console.error(error);
+      res
+        .status(error.statuscode || 500)
+        .json({ error: error.message || "Server error" });
+    }
+  }
+);
+
+router.get("/getfeedback/:email", async (req, res, next) => {
+  try {
+    const email = req.params.email;
+    console.log(email);
+    const feedback = await Feedback.find({ patientEmail: email });
+    console.log(feedback);
+    if (!feedback || feedback.length === 0) {
+      return res.status(404).json({ message: "Reports not found" });
+    }
+
+    const feedbackData = feedback.map((f) => {
+      return {
+        _id: f._id,
+        CreatedAt: f.createdAt,
+        DoctorEmail: f.doctorEmail,
+        description: f.description,
+        reportID: f.reportID,
+      };
+    });
+
+    res.status(200).json(feedbackData);
   } catch (error) {
     console.error(error);
-    res.status(error.statuscode || 500).json({ error: error.message || "Server error" });
+    res.status(500).json({ error: "Server error" });
   }
-})
+});
+
+router.get("/getFeedbackbyID/:feedbacId", async (req, res, next) => {
+  try {
+    const feedbackId = req.params.feedbacId;
+
+    console.log(feedbackId);
+    // Fetch the report by its ID from the database
+    const feedbackk = await Feedback.findById(feedbackId);
+
+    console.log(feedbackk);
+
+    // Send the PDF file to the client
+    res.send(feedbackk.description);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 module.exports = router;

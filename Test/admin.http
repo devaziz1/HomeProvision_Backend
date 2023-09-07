@@ -156,3 +156,6 @@ Content-Type: application/json
 "password":"SE7"
 
 }
+
+############# Admin get profile
+GET http://localhost:8080/admin/profile/admin001@gmail.com

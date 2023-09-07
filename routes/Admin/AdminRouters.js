@@ -149,9 +149,10 @@ function verifyToken(req, res, next) {
   }
 }
 
-router.get("/profile", async (req, res, next) => {
+router.get("/profile/:email", async (req, res, next) => {
   try {
-    const email = "admin001@gmail.com";
+    const email = req.params.email;
+    
     const admin = await Admin.findOne({ email });
     res.status(200).json(admin);
   } catch (error) {
@@ -409,7 +410,6 @@ router.post("/patient/signup", async (req, res, next) => {
       medical_history,
       gender,
       phoneNumber,
-      doctorID,
     } = req.body;
 
     const adminID = "6463e56b2621ab5034d067d8";

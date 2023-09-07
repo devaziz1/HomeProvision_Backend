@@ -12,6 +12,7 @@ const DoctorSchedule = require("../../models/DoctorSchedule");
 const Patient = require("../../models/PatientModel");
 const Complaint = require("../../models/Complaints");
 const PatientReport = require("../../models/PatientReport");
+const feedback = require("../../models/FeedbackModel");
 
 const adminController = require("../../controller/adminController");
 const { body, validationResult } = require("express-validator");
@@ -200,6 +201,46 @@ router.get("/getreports/:email", async (req, res, next) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.post("/provideFeedback", async (req, res, next) => {
+  try {
+    const {
+      doctorEmail,
+      patientEmail,
+      description,
+      reportID,
+      
+    } = req.body;
+
+    const doctor = Doctor.findOne({ email: doctorEmail });
+    const patient = Patient.findOne({ email: patientEmail });
+    if (!doctor) {
+      const error = new Error("Provide Valid Doctor's Email");
+      error.statuscode = 401;
+      throw error;
+    }
+    if (!patient) {
+      const error = new Error("Provide Valid Patient's Email");
+      error.statuscode = 401;
+      throw error;
+    }
+
+    const Feedback = new feedback({
+      doctorEmail,
+      patientEmail,
+      description,
+      reportID
+    });
+
+    await Feedback.save();
+    return res.status(200).json(Feedback);
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
   }
 });
 

@@ -32,7 +32,9 @@ Content-Type: application/json
 "email":"UzairAziz4893@gmail.com",
 "doctorEmail":"newd123@gmail.com",
 "slot":"1:30 - 2:00 PM",
-"createdAt": "2023-09-30"
+"createdAt": "2023-09-30",
+"type":"Online",
+"status":"completed"
 }
 
 
@@ -42,8 +44,8 @@ POST http://localhost:8080/patient/makeAppointment
 Content-Type: application/json
 
 {
-    "type":"Physical",
-    "status":"pending",
+    "type":"Online",
+    "status":"Completed",
     "doctorID":"6465539dc81287f0c274a0ad"
 
 }
@@ -99,8 +101,8 @@ Content-Type: application/json
 
 {
    "name":"Aziz Naseer",
-    "oldpassword":"1234",
-    "newPass":"mypass",
+    "oldpassword":"123",
+    "newPass":"12345",
     "email":"UzairAziz4893@gmail.com",
     "medical_history":"Allergic to penicillin",
     "phoneNumber":"0313648866",
@@ -110,3 +112,9 @@ Content-Type: application/json
 
 ############# Doctor Get Appiontments
 GET http://localhost:8080/patient/appiontments/UzairAziz4893@gmail.com
+
+############# Get All feedback
+GET http://localhost:8080/patient/getfeedback/UzairAziz4893@gmail.com
+
+############# Get All feedback
+GET http://localhost:8080/patient/getFeedbackbyID/64f8480aed9434c4cc6d1553
