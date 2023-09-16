@@ -3,8 +3,8 @@ POST http://localhost:8080/doctor/login
 Content-Type: application/json
 
 {
-"email":"uzairiqbal3313@gmail.com",
-"password":"331371"
+"email":"newd123@gmail.com",
+"password":"1234"
 }
 
 ############# Doctor Update Schedule
@@ -17,7 +17,7 @@ Content-Type: application/json
 }
 
 ############# Doctor Get Appiontments
-GET http://localhost:8080/doctor/appiontments/newd123@gmail.com
+GET http://localhost:8080/doctor/appiontments/drrohail21@gmail.com
 
 
 ############# Doctor profile
@@ -29,7 +29,7 @@ Content-Type: application/json
 
 {
 "doctorEmail":"newd123@gmail.com",
-"patientEmail":"UzairAziz4893@gmail.com",
+"patientEmail":"Uzaiadmin4893@gmail.com",
 "description":"Some prescription description ",
 "dosage":"2-1-3",
 "medicineName":"Panadol",
@@ -54,5 +54,23 @@ Content-Type: application/json
 "patientEmail":"UzairAziz4893@gmail.com",
 "description": "Feedback from doctor",
 "reportID":"032"
+
+}
+
+#################### Doctor ==> get  Profile
+GET http://localhost:8080/doctor/getProfile/drsania099@gmail.com
+
+##################### update doctor
+PATCH http://localhost:8080/doctor/updatePorfile
+Content-Type: application/json
+
+{
+   "name":"Sania Naseer",
+    "oldpassword":"sania1234",
+    "newPass":"sania123",
+    "email":"drsania099@gmail.com",
+    "LN":"jsha872",
+    "phoneNumber":"0313648866",
+    "gender":"Female"
 
 }

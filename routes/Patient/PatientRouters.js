@@ -53,9 +53,11 @@ router.post(
       const { name, email, password, medical_history, gender, phoneNumber } =
         req.body;
 
-      const adminID = "6463e56b2621ab5034d067d8";
+      const adminID = "64fb919275c0e936e789146d"; 
 
       const admin = await Admin.findById(adminID);
+
+      console.log(admin);
 
       const hashedPassword = await argon2.hash(password);
 
@@ -95,7 +97,7 @@ router.post(
         );
         res
           .status(201)
-          .json({ mesg: "Patient created sucess", adminId: result._id });
+          .json({ mesg: "Patient created sucess", adminId: result._id, email, name });
       }
     } catch (error) {
       if (!error.statusCode) {
@@ -147,8 +149,10 @@ router.post(
           error.statuscode = 401;
           throw error;
         }
+        const name = patient.name;
         res.status(200).json({
           email,
+          name,
           message: "Patient Login sucessfull ",
           token,
         });
@@ -179,11 +183,13 @@ router.post("/createAppointment", async (req, res, next) => {
       error.statuscode = 401;
       throw error;
     }
+    const DoctorName = doctor.name;
 
     const app = new Appointment({
       email,
       name,
       doctorEmail,
+      DoctorName,
       slot,
       createdAt,
     });

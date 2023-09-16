@@ -22,6 +22,7 @@ app.use(express.json());
 
 const doctorController = require("../../controller/doctorController");
 const Prescription = require("../../models/Prescription");
+const AppointmentModel = require("../../models/AppointmentModel");
 
 router.post(
   "/login",
@@ -64,8 +65,10 @@ router.post(
           error.statuscode = 401;
           throw error;
         }
+        const name = doctor.name;
         res.status(200).json({
           email,
+          name,
           message: "Doctor Login sucessfull ",
           token,
         });
@@ -120,7 +123,7 @@ router.get("/profile/:email", async (req, res, next) => {
 router.get("/appiontments/:email", async (req, res, next) => {
   try {
     const { email } = req.params;
-    const doctor = await DoctorAppointments.find({ doctorEmail: email });
+    const doctor = await AppointmentModel.find({ doctorEmail: email });
 
     if (!doctor) {
       return res.status(404).json({ error: "Doctor not found" });
@@ -147,8 +150,8 @@ router.post("/createPrescription", async (req, res, next) => {
       endDate,
     } = req.body;
 
-    const doctor = Doctor.findOne({ email: doctorEmail });
-    const patient = Patient.findOne({ email: patientEmail });
+    const doctor = await Doctor.findOne({ email: doctorEmail });
+    const patient = await Patient.findOne({ email: patientEmail });
     if (!doctor) {
       const error = new Error("Provide Valid Doctor's Email");
       error.statuscode = 401;
@@ -214,10 +217,10 @@ router.post("/provideFeedback", async (req, res, next) => {
       
     } = req.body;
 
-    const doctor = Doctor.findOne({ email: doctorEmail });
-    const patient = Patient.findOne({ email: patientEmail });
+    const doctor = await Doctor.findOne({ email: doctorEmail });
+    const patient =await Patient.findOne({ email: patientEmail });
     if (!doctor) {
-      const error = new Error("Provide Valid Doctor's Email");
+      const error =  new Error("Provide Valid Doctor's Email");
       error.statuscode = 401;
       throw error;
     }
@@ -243,6 +246,74 @@ router.post("/provideFeedback", async (req, res, next) => {
     next(error);
   }
 });
+
+router.get("/getProfile/:email", async (req, res, next) => {
+  try {
+    const email = req.params.email;
+
+    console.log("Email " + email);
+
+    // Fetch the report by its ID from the database
+    const profile = await Doctor.findOne({ email });
+
+    console.log(profile);
+
+    if (!profile) {
+      return res.status(404).json({ message: "Profile not found" });
+    }
+
+    res.status(200).json(profile);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
+router.patch("/updatePorfile", async (req,res , next) =>{
+  try {
+    const {
+      name,
+      oldpassword,
+      newPass,
+      email,
+      LN,
+      gender,
+      phoneNumber,
+    } = req.body;
+
+    const doctor = await Doctor.findOne({ email });
+
+    console.log("Old Password " + oldpassword);
+    console.log("New " + newPass);
+
+    if (!doctor) {
+      const error = new Error("doctor Does not exist!!!");
+      error.statuscode = 401;
+      throw error;
+    }
+
+    const passwordMatches = await argon2.verify(doctor.password, oldpassword);
+
+    const newPassword = await argon2.hash(newPass);
+
+    if (!passwordMatches) {
+      return res.status(401).json({ error: "Provide Correct Password" });
+      
+    }
+    doctor.name = name;
+    doctor.password = newPassword;
+    doctor.gender = gender;
+    doctor.phoneNumber = phoneNumber;
+    doctor.medicalLicenseNo = LN;
+
+    const result = await doctor.save();
+    res.status(200).json({ message: "doctor updated ", doctor: result });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+})
 
 router.get("/getAllPatients/:doctorId", doctorController.getAllPatients);
 

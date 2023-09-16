@@ -1,12 +1,11 @@
 const express = require("express");
 require("dotenv").config();
 const app = express();
-const argon2 = require('argon2');
+const argon2 = require("argon2");
 const Admin = require("../../models/AdminModel");
 const bcrypt = require("bcryptjs");
 let jwt = require("jsonwebtoken");
-const multer = require('multer');
-
+const multer = require("multer");
 
 const Doctor = require("../../models/DoctorModel");
 const Patient = require("../../models/PatientModel");
@@ -18,7 +17,6 @@ const { body, validationResult } = require("express-validator");
 const router = express.Router();
 
 app.use(express.json());
-
 
 // Configure multer for file uploads
 const storage = multer.memoryStorage();
@@ -73,8 +71,7 @@ router.post(
       .notEmpty()
       .withMessage("Email is required")
       .isEmail()
-      .withMessage("Enter a valid email")
-      .normalizeEmail(),
+      .withMessage("Enter a valid email"),
     body("password").trim().notEmpty().withMessage("Password is required"),
   ],
   async (req, res, next) => {
@@ -152,7 +149,7 @@ function verifyToken(req, res, next) {
 router.get("/profile/:email", async (req, res, next) => {
   try {
     const email = req.params.email;
-    
+
     const admin = await Admin.findOne({ email });
     res.status(200).json(admin);
   } catch (error) {
@@ -188,9 +185,8 @@ router.post(
         phoneNumber,
       } = req.body;
 
-      const adminID = "6463e56b2621ab5034d067d8";
+      const adminID = "64fb919275c0e936e789146d";
       const hashedPassword = await argon2.hash(password);
-
 
       const admin = await Admin.findById(adminID);
 
@@ -206,7 +202,7 @@ router.post(
       } else {
         const doctor = new Doctor({
           name,
-          password:hashedPassword,
+          password: hashedPassword,
           email,
           medicalLicenseNo,
           specialization,
@@ -363,23 +359,22 @@ router.get("/getAllDoctor/:adminId", verifyToken, async (req, res, next) => {
     res.status(500).json({ error: "Server error" });
   }
 });
-router.get("/getComplaintBody/:_id", async (req, res, next)=>{
-  try{
-    const {_id} = req.params;
+router.get("/getComplaintBody/:_id", async (req, res, next) => {
+  try {
+    const { _id } = req.params;
     const complaint = await Complaint.findById(_id);
 
     if (!complaint) {
       return res.status(404).json({ error: "Complaint Does Not Found" });
     }
     return res.status(200).json({
-      complaint
+      complaint,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });
   }
-})
+});
 
 router.delete("/doctor/delete/:email", async (req, res, next) => {
   const { email } = req.params;
@@ -403,16 +398,10 @@ router.post("/createSession", adminController.createSession);
 router.post("/patient/signup", async (req, res, next) => {
   console.log(req.body);
   try {
-    const {
-      name,
-      email,
-      password,
-      medical_history,
-      gender,
-      phoneNumber,
-    } = req.body;
+    const { name, email, password, medical_history, gender, phoneNumber } =
+      req.body;
 
-    const adminID = "6463e56b2621ab5034d067d8";
+    const adminID = "64fb919275c0e936e789146d";
 
     const admin = await Admin.findById(adminID);
     // const doctor = await Doctor.findById(doctorID);
@@ -427,23 +416,21 @@ router.post("/patient/signup", async (req, res, next) => {
       error.statuscode = 401;
       throw error;
     } else {
-     
-    const hashpassword = await argon2.hash(password);
+      const hashpassword = await argon2.hash(password);
 
       const patient = new Patient({
         name,
-        password : hashpassword,
+        password: hashpassword,
         email,
         medical_history,
         gender,
         phoneNumber,
         adminID: admin._id,
-       
       });
 
       const result = await patient.save();
       admin.patients.push(patient._id);
-     
+
       await patient.save();
       await admin.save();
 
@@ -488,14 +475,8 @@ router.post("/patient/login", async (req, res, next) => {
 
 router.patch("/patient/Aupdate", async (req, res, next) => {
   try {
-    const {
-      name,
-      password,
-      email,
-      medical_history,
-      gender,
-      phoneNumber
-    } = req.body;
+    const { name, password, email, medical_history, gender, phoneNumber } =
+      req.body;
 
     const patient = await Patient.findOne({ email });
 
@@ -511,76 +492,116 @@ router.patch("/patient/Aupdate", async (req, res, next) => {
       patient.medical_history = medical_history;
     }
     const result = await patient.save();
-     res.status(200).json({ message: "Patient updated ", patient: result });
+    res.status(200).json({ message: "Patient updated ", patient: result });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-
-router.get("/getAllCompaint", async(req,res,next)=>{
-  try{
+router.get("/getAllCompaint", async (req, res, next) => {
+  try {
     const complaints = await Complaint.find();
     res.status(200).json(complaints);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });
   }
-})
+});
 
-router.delete("/deleteComplaint/:_id", async(req, res, next) =>{
-  try{
-    const {_id} = req.params;
+router.delete("/deleteComplaint/:_id", async (req, res, next) => {
+  try {
+    const { _id } = req.params;
     const complaint = await Complaint.findByIdAndDelete(_id);
 
     if (complaint) {
       res.status(200).json({ message: "Compaint deleted sucessful" });
       console.log("Complaint Deleted");
-
     }
-  }
-  catch (error) {
+  } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-router.get("/searchCom/:email",async(req,res,next)=>{
-  try{
+router.get("/searchCom/:email", async (req, res, next) => {
+  try {
     const { email } = req.params;
 
     const complaint = await Complaint.find({ email });
 
-    if(complaint.length === 0){
+    if (complaint.length === 0) {
       const error = new Error("Please Provide Valid Email");
-        error.statuscode = 401;
-        throw error;
+      error.statuscode = 401;
+      throw error;
     }
     res.status(200).json(complaint);
-
-
-
-  }catch (error) {
-    console.error(error);
-    res.status(error.statuscode || 500).json({ error: error.message || "Server error" });
-  }
-})
-
-router.post("/UploadReport", upload.single('pdfFile') ,async (req,res,next) =>{
-  try {
-    const { patientEmail } = req.body;
-    const pdfReport = req.file.buffer;
-
-    const report = new PatientReport({patientEmail,pdfReport});
-    await report.save();
-    res.status(201).json({ message: 'Patient information and PDF uploaded successfully' });
-    
   } catch (error) {
     console.error(error);
-    res.status(error.statuscode || 500).json({ error: error.message || "Server error" });
+    res
+      .status(error.statuscode || 500)
+      .json({ error: error.message || "Server error" });
   }
-})
+});
+
+router.post(
+  "/UploadReport",
+  upload.single("pdfFile"),
+  async (req, res, next) => {
+    try {
+      const { patientEmail } = req.body;
+      const pdfReport = req.file.buffer;
+
+      const report = new PatientReport({ patientEmail, pdfReport });
+      await report.save();
+      res
+        .status(201)
+        .json({ message: "Patient information and PDF uploaded successfully" });
+    } catch (error) {
+      console.error(error);
+      res
+        .status(error.statuscode || 500)
+        .json({ error: error.message || "Server error" });
+    }
+  }
+);
+
+router.patch("/updateProfile", async (req, res) => {
+  try {
+    const { name, oldpassword, newPass } = req.body;
+
+    const email = "NephrolAI@gmail.com";
+
+    const admin = await Admin.findOne({ email });
+
+    if (!admin) {
+      const error = new Error("admin Does not exist!!!");
+      error.statuscode = 401;
+      throw error;
+    }
+
+    console.log(admin)
+
+    console.log("Old Password " + oldpassword);
+    console.log("New " + newPass);
+
+    const passwordMatches = await argon2.verify(admin.password, oldpassword);
+
+    const newPassword = await argon2.hash(newPass);
+
+    if (!passwordMatches) {
+      return res.status(401).json({ error: "Provide Correct Password" });
+    }
+    admin.name = name;
+    admin.password = newPassword;
+
+    const result = await admin.save();
+    res.status(200).json({ message: "doctor updated ", admin: result });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 router.get("/getAllPatient/:adminId", adminController.getAllPatient);
 router.delete("/patient/delete/:email", adminController.deletePatient);
 

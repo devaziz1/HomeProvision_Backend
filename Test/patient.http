@@ -4,9 +4,9 @@ POST http://localhost:8080/patient/signup
 Content-Type: application/json
 
 {
-     "name":"ALI  Hussan",
+     "name":"Afnan Malik",
     "password":"87236",
-    "email":"Alihassan23@gmail.com",
+    "email":"AfnanMalik@gmail.com",
     "medical_history":"Allergic to penicillin",
     "phoneNumber":"0313648866",
     "gender":"Male"
@@ -19,8 +19,8 @@ POST http://localhost:8080/patient/login
 Content-Type: application/json
 
 {
-"email":"UzairAziz4893@gmail.com",
-"password":"1234"
+"email":"waqassaleem99@gmail.com",
+"password":"waqas123"
 }
 
 ############# Create Appointment
@@ -28,13 +28,13 @@ POST http://localhost:8080/patient/createAppointment
 Content-Type: application/json
 
 {
-"name":" Uzair",
-"email":"UzairAziz4893@gmail.com",
-"doctorEmail":"newd123@gmail.com",
-"slot":"1:30 - 2:00 PM",
+"name":"Afnan Malik",
+"email":"uzair1122@gmail.com",
+"doctorEmail":"drrohail21@gmail.com",
+"slot":"12:30 - 1:00 PM",
 "createdAt": "2023-09-30",
 "type":"Online",
-"status":"completed"
+"status":"Physical"
 }
 
 
@@ -95,7 +95,7 @@ GET http://localhost:8080/patient/getreports/UzairAziz4893@gmail.com
 #################### Patient ==> get  Profile
 GET http://localhost:8080/patient/getProfile/UzairAziz4893@gmail.com
 
-##################### update doctor
+##################### update Pstient
 PATCH http://localhost:8080/patient/updateProfile
 Content-Type: application/json
 

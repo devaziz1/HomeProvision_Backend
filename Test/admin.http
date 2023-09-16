@@ -4,9 +4,9 @@ POST http://localhost:8080/admin/signup
 Content-Type: application/json
 
 {
-    "name":"Uzair Naseer",
+    "name":"Aziz Naseer",
     "password":"admin",
-    "email":"Uzair001@gmail.com"
+    "email":"NephrolAI@gmail.com"
 
 }
 
@@ -15,7 +15,7 @@ POST http://localhost:8080/admin/login
 Content-Type: application/json
 
 {
-"email":"admin001@gmail.com",
+"email":"NephrolAI@gmail.com",
 "password":"admin"
 }
 
@@ -37,12 +37,12 @@ Content-Type: application/json
 
 {
     "name":"Dr Rohail",
-    "password":"rohail123",
-    "email":"Rohail09@gmail.com",
+    "password":"drrohail123",
+    "email":"Rohail009@gmail.com",
      "specialization":"Nephrologist",
     "medicalLicenseNo":"72132saq",
     "gender":"Male",
-    "phoneNumber":"03136444866"
+    "phoneNumber":"03364111954"
 
 }
 
@@ -83,11 +83,11 @@ POST http://localhost:8080/admin/patient/signup
 Content-Type: application/json
 
 {
-    "name":"ALI  Hussain",
-    "password":"87236",
-    "email":"IeSAsa21@gmail.com",
-    "medical_history":"Allergic to penicillin",
-    "phoneNumber":"0313648866",
+    "name":"Waqas Saleem",
+    "password":"waqas123",
+    "email":"waqassaleem99@gmail.com",
+    "medical_history":"Hypertension",
+    "phoneNumber":"03306556466",
     "gender":"Male"
 
 }
@@ -159,3 +159,13 @@ Content-Type: application/json
 
 ############# Admin get profile
 GET http://localhost:8080/admin/profile/admin001@gmail.com
+
+##################### update admin
+PATCH http://localhost:8080/admin/updateProfile
+Content-Type: application/json
+
+{
+   "name":"Uzair Naseer",
+    "oldpassword":"admin",
+    "newPass":"admin23"
+}
