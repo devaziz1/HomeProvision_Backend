@@ -16,6 +16,10 @@ Content-Type: application/json
 "selectedSlots":["1:00 - 1:30 PM","9:00 - 1:30 AM","9:30 - 10:00 AM","11:00 - 11:30 AM"]
 }
 
+############# Doctor My Slots
+GET http://localhost:8080/doctor/myslots?email=drmustafa123@gmail.com&day=Monday
+
+
 ############# Doctor Get Appiontments
 GET http://localhost:8080/doctor/appiontments/drrohail21@gmail.com
 

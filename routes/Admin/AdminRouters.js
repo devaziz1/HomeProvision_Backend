@@ -185,7 +185,7 @@ router.post(
         phoneNumber,
       } = req.body;
 
-      const adminID = "64fb919275c0e936e789146d";
+      const adminID = "655e5dcba812c44f8a7f2a3f";
       const hashedPassword = await argon2.hash(password);
 
       const admin = await Admin.findById(adminID);
@@ -200,15 +200,10 @@ router.post(
         error.statuscode = 401;
         throw error;
       } else {
-        const doctor = new Doctor({
-          name,
-          password: hashedPassword,
-          email,
-          medicalLicenseNo,
-          specialization,
-          gender,
-          phoneNumber,
-          slots: [
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        const slots = days.map((day) => {
+         
+          const daySlots = [
             "9:00 - 9:30 AM",
             "9:30 - 10:00 AM",
             "10:00 - 10:30 AM",
@@ -223,7 +218,23 @@ router.post(
             "2:30 - 3:00 PM",
             "3:00 - 3:30 PM",
             "3:30 - 4:00 PM",
-          ],
+          ];
+    
+          return {
+            day,
+            timings: daySlots,
+          };
+        });
+
+        const doctor = new Doctor({
+          name,
+          password: hashedPassword,
+          email,
+          medicalLicenseNo,
+          specialization,
+          gender,
+          phoneNumber,
+          slots,
           adminID: admin._id,
         });
 
@@ -308,10 +319,11 @@ router.get("/doctor/search/:email", async (req, res, next) => {
     const doctor = await Doctor.findOne({ email });
 
     if (!doctor) {
-      const error = new Error("Please Provide Valid Email");
+      const error = new Error("Doctor Not Found");
       error.statuscode = 401;
       throw error;
     }
+
 
     res.status(200).json(doctor);
   } catch (error) {
@@ -328,7 +340,7 @@ router.get("/patient/search/:email", async (req, res, next) => {
     const patient = await Patient.findOne({ email });
 
     if (!patient) {
-      const error = new Error("Please Provide Valid Email");
+      const error = new Error("Patient Not Found");
       error.statuscode = 401;
       throw error;
     }
@@ -401,7 +413,7 @@ router.post("/patient/signup", async (req, res, next) => {
     const { name, email, password, medical_history, gender, phoneNumber } =
       req.body;
 
-    const adminID = "64fb919275c0e936e789146d";
+    const adminID = "655e5dcba812c44f8a7f2a3f";
 
     const admin = await Admin.findById(adminID);
     // const doctor = await Doctor.findById(doctorID);
@@ -602,9 +614,40 @@ router.patch("/updateProfile", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+
+
+router.get("/dashboardDetails", async (req, res, next) => {
+  try {
+    console.log("Inside dashbord details");
+    // Find the admin by email
+    const admin = await Admin.findOne({ email: "NephrolAI@gmail.com" });
+
+    if (!admin) {
+      return res.status(404).json({ error: 'Admin not found' });
+    }
+
+    // Count the number of patients and doctors associated with the admin
+    const totalPatients = admin.patients.length;
+    const totalDoctors = admin.doctors.length;
+
+    // Return the result as JSON
+    res.json({ totalPatients, totalDoctors });
+    
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: 'Server error' });
+  }
+});
+
+
 router.get("/getAllPatient/:adminId", adminController.getAllPatient);
 router.delete("/patient/delete/:email", adminController.deletePatient);
 
 router.get("/getAllComplaints", adminController.getAllComaplints);
+
+
+
 
 module.exports = router;

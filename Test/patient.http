@@ -28,7 +28,6 @@ POST http://localhost:8080/patient/createAppointment
 Content-Type: application/json
 
 {
-"name":"Afnan Malik",
 "email":"uzair1122@gmail.com",
 "doctorEmail":"drrohail21@gmail.com",
 "slot":"12:30 - 1:00 PM",
@@ -86,6 +85,9 @@ GET http://localhost:8080/patient/getPrescriptionsById/64d6b43593b3badb530cf21e
 
 ##################### delete Prescription
 DELETE  http://localhost:8080/patient/deletePrescription/64d6b4d193b3badb530cf222
+
+##################### delete Appointment
+DELETE  http://localhost:8080/patient/deleteApp/64c68b03b340438125c627dd
 
 
 #################### Patient ==> get  PDF Reports

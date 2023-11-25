@@ -120,15 +120,52 @@ router.get("/profile/:email", async (req, res, next) => {
   }
 });
 
+// Example route to get doctor slots for a specific day
+router.get('/myslots', async (req, res, next) => {
+  try {
+    const { email, day } = req.query;
+
+    console.log(email);
+    console.log(day);
+    
+    if (!email || !day) {
+      return res.status(400).json({ error: 'Doctor email and day are required.' });
+    }
+
+    // Find the doctor by email
+    const doctor = await Doctor.findOne({ email});
+
+    if (!doctor) {
+      return res.status(404).json({ error: 'Doctor not found.' });
+    }
+
+    // Find the slots for the specified day
+    const slotsForDay = doctor.slots.find((slot) => slot.day === day);
+
+    if (!slotsForDay) {
+      return res.status(404).json({ error: `No slots found for ${day}.` });
+    }
+
+    return res.status(200).json({ slots: slotsForDay.timings });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
+
 router.get("/appiontments/:email", async (req, res, next) => {
   try {
     const { email } = req.params;
+
+    
     const doctor = await AppointmentModel.find({ doctorEmail: email });
 
     if (!doctor) {
       return res.status(404).json({ error: "Doctor not found" });
     }
 
+   
     res.json(doctor);
   } catch (error) {
     if (!error.statusCode) {

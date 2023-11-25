@@ -50,7 +50,7 @@ app.use(cors({
 // }));
 
 mongoose
-  .connect("mongodb://127.0.0.1:27017/NephrolAI")
+  .connect("mongodb+srv://AzizNaseer:uzair493@nephrolai.twwwqs6.mongodb.net/")
   .then(() => {
     app.listen(port, () => {
       console.log("App is runing");

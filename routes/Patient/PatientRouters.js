@@ -5,7 +5,7 @@ const argon2 = require("argon2");
 const Admin = require("../../models/AdminModel");
 const bcrypt = require("bcryptjs");
 let jwt = require("jsonwebtoken");
-
+const stripe = require('stripe')('sk_test_51OFwfVJtGdhOhFxG5hMS2s6WNQdg26xwRPnomqirgprwrwGX1KaAFXaorA5AzNOe4WoBJZpHfTajSkHEuRDHx3XS005BVjBcAG');
 const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
@@ -53,7 +53,7 @@ router.post(
       const { name, email, password, medical_history, gender, phoneNumber } =
         req.body;
 
-      const adminID = "64fb919275c0e936e789146d"; 
+      const adminID = "655e5dcba812c44f8a7f2a3f"; 
 
       const admin = await Admin.findById(adminID);
 
@@ -168,7 +168,7 @@ router.post(
 
 router.post("/createAppointment", async (req, res, next) => {
   try {
-    const { email, name, doctorEmail, slot, createdAt } = req.body;
+    const { email, doctorEmail, slot,type,createdAt } = req.body;
     console.log(doctorEmail);
     const patient = await Patient.findOne({ email });
 
@@ -183,22 +183,37 @@ router.post("/createAppointment", async (req, res, next) => {
       error.statuscode = 401;
       throw error;
     }
+
+    // Remove the booked slot from doctor's timings
+    doctor.slots = doctor.slots.map((docSlot) => {
+      if (docSlot.timings.includes(slot)) {
+        docSlot.timings = docSlot.timings.filter((time) => time !== slot);
+      }
+      return docSlot;
+    });
+
+    // Save the updated doctor information
+    await doctor.save();
+
     const DoctorName = doctor.name;
+    const name = patient.name;
 
     const app = new Appointment({
       email,
       name,
+      createdAt,
+      DoctorName,
+      type,
       doctorEmail,
       DoctorName,
-      slot,
-      createdAt,
+      slot
     });
 
     await app.save();
     console.log("Appiontment Done Sucessfully");
 
     res.status(200).json({
-      message: "Appointment created Sucessfully",
+      message: "Appointment Booked Sucessfully",
     });
   } catch (error) {
     if (error.code === 11000) {
@@ -336,6 +351,36 @@ router.delete("/deletePrescription/:_id", async (req, res, next) => {
   }
 });
 
+router.delete("/deleteApp/:_id", async (req, res, next) => {
+  try {
+    const { _id } = req.params;
+    const appointment = await Appointment.findByIdAndDelete(_id);
+
+    if (appointment) {
+      res.status(200).json({ message: "Appointment deleted sucessful" });
+      console.log("appointment Deleted");
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.delete("/cancelApp/:_id", async (req, res, next) => {
+  try {
+    const { _id } = req.params;
+    const appointment = await Appointment.findByIdAndDelete(_id);
+
+    if (appointment) {
+      res.status(200).json({ message: "Appointment cancel sucessful" });
+      console.log("appointment cancelled");
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 router.get("/getreports/:email", async (req, res, next) => {
   try {
     const email = req.params.email;
@@ -390,6 +435,8 @@ router.get("/getProfile/:email", async (req, res, next) => {
     const email = req.params.email;
 
     console.log("Email " + email);
+
+    console.log("Hello");
 
     // Fetch the report by its ID from the database
     const profile = await Patient.findOne({ email });
@@ -538,6 +585,41 @@ router.get("/getFeedbackbyID/:feedbacId", async (req, res, next) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });
+  }
+});
+
+
+router.post('/payment', async (req, res) => {
+  const { cardnumber, expireDate, securityCode } = req.body;
+
+  console.log("Inside backend controller function");
+
+  try {
+    // Create a PaymentMethod using the card information
+    const paymentMethod = await stripe.paymentMethods.create({
+      type: 'card',
+      card: {
+        number: cardnumber,
+        exp_month: expireDate.split('/')[0],
+        exp_year: expireDate.split('/')[1],
+        cvc: securityCode,
+      },
+    });
+
+    // Create a PaymentIntent using the PaymentMethod
+    const paymentIntent = await stripe.paymentIntents.create({
+      payment_method: paymentMethod.id,
+      amount: 1000, // 10 dollars in cents
+      currency: 'usd',
+      confirm: true,
+    });
+
+    // Handle the success response as needed
+    res.status(200).json({ success: true, paymentIntent });
+  } catch (error) {
+    console.error('Error processing payment:', error.message);
+    // Handle the error response as needed
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 

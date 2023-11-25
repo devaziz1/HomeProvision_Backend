@@ -53,7 +53,19 @@ const doctorSchema=new Schema({
         required:true,
         default:false,
     },
-    slots:[String],
+    slots: [
+      {
+        day: {
+          type: String,
+          enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        },
+        timings: [
+          {
+            type: String,
+          },
+        ],
+      },
+    ]
     
 });
 module.exports=mongoose.model("Doctor",doctorSchema);

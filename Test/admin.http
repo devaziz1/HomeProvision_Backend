@@ -36,9 +36,9 @@ POST http://localhost:8080/admin/doctor/signup
 Content-Type: application/json
 
 {
-    "name":"Dr Rohail",
-    "password":"drrohail123",
-    "email":"Rohail009@gmail.com",
+    "name":"Dr Mustafa",
+    "password":"12345",
+    "email":"drmustafa123@gmail.com",
      "specialization":"Nephrologist",
     "medicalLicenseNo":"72132saq",
     "gender":"Male",
@@ -159,6 +159,9 @@ Content-Type: application/json
 
 ############# Admin get profile
 GET http://localhost:8080/admin/profile/admin001@gmail.com
+
+############# Admin Dashboard Details
+GET http://localhost:8080/admin/dashboardDetails
 
 ##################### update admin
 PATCH http://localhost:8080/admin/updateProfile
