@@ -5,9 +5,10 @@ const argon2 = require("argon2");
 const Admin = require("../../models/AdminModel");
 const bcrypt = require("bcryptjs");
 let jwt = require("jsonwebtoken");
-const stripe = require('stripe')('sk_test_51OFwfVJtGdhOhFxG5hMS2s6WNQdg26xwRPnomqirgprwrwGX1KaAFXaorA5AzNOe4WoBJZpHfTajSkHEuRDHx3XS005BVjBcAG');
+const stripe = require('stripe')('pk_test_51OFeIXAjIv746725reMuQwc4e7qWqq9RB5mW8jTwrPuUwLaPhxdCYbta9oMiSOBYHh7g8YfbKGcIm6XngqAOj7tI00OPF71SID');
 const path = require("path");
 const fs = require("fs");
+const {v4: uuid4} = require('uuid');
 const multer = require("multer");
 
 const Doctor = require("../../models/DoctorModel");
@@ -606,37 +607,27 @@ router.get("/getFeedbackbyID/:feedbacId", async (req, res, next) => {
 
 
 router.post('/payment', async (req, res) => {
-  const { cardnumber, expireDate, securityCode } = req.body;
+    
+      console.log(req.body.token);
+      const {token, amount} = req.body;
+      const key = uuid4();
 
-  console.log("Inside backend controller function");
-
-  try {
-    // Create a PaymentMethod using the card information
-    const paymentMethod = await stripe.paymentMethods.create({
-      type: 'card',
-      card: {
-        number: cardnumber,
-        exp_month: expireDate.split('/')[0],
-        exp_year: expireDate.split('/')[1],
-        cvc: securityCode,
-      },
-    });
-
-    // Create a PaymentIntent using the PaymentMethod
-    const paymentIntent = await stripe.paymentIntents.create({
-      payment_method: paymentMethod.id,
-      amount: 1000, // 10 dollars in cents
-      currency: 'usd',
-      confirm: true,
-    });
-
-    // Handle the success response as needed
-    res.status(200).json({ success: true, paymentIntent });
-  } catch (error) {
-    console.error('Error processing payment:', error.message);
-    // Handle the error response as needed
-    res.status(500).json({ success: false, error: error.message });
-  }
+      return stripe.customers.create({
+        email: token.email,
+        source: token
+      }).then(customer =>{
+        stripe.charges.create({
+          amount: amount * 100,
+          currency: 'usd',
+          customer: customer.id,
+          receipt_email: token.email
+        },{key})
+      }).then(result =>{
+        res.status(200).json(result)
+      }).catch(err => {
+        console.log(err);
+      })
 });
+
 
 module.exports = router;
