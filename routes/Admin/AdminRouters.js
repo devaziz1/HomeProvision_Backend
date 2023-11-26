@@ -235,6 +235,7 @@ router.post(
           gender,
           phoneNumber,
           slots,
+          aslots: slots,
           adminID: admin._id,
         });
 

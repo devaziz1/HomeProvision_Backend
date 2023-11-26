@@ -84,7 +84,7 @@ router.post(
 
 router.put("/updateSchedule", async (req, res, next) => {
   try {
-    const { email, selectedSlots } = req.body;
+    const { email, day, timings } = req.body;
 
     const doctor = await Doctor.findOne({ email });
 
@@ -92,12 +92,37 @@ router.put("/updateSchedule", async (req, res, next) => {
       return res.status(404).json({ error: "Doctor not found" });
     }
 
-    doctor.slots = selectedSlots;
+    // Find the day in the slots array
+    const selectedDayIndex = doctor.slots.findIndex((slot) => slot.day === day);
+    const selectedDayIndex1 = doctor.aslots.findIndex((slot) => slot.day === day);
+
+
+    if (selectedDayIndex !== -1) {
+      // Clear existing timings for the selected day
+      doctor.slots[selectedDayIndex].timings = [];
+      // Push the new timings
+      doctor.slots[selectedDayIndex].timings.push(...timings);
+    } else {
+      // Add a new entry if the day is not found
+      doctor.slots.push({ day, timings });
+    }
+
+    
+    if (selectedDayIndex1 !== -1) {
+      // Clear existing timings for the selected day
+      doctor.aslots[selectedDayIndex1].timings = [];
+      // Push the new timings
+      doctor.aslots[selectedDayIndex1].timings.push(...timings);
+    } else {
+      // Add a new entry if the day is not found
+      doctor.aslots.push({ day, timings });
+    }
+
     await doctor.save();
 
     return res
       .status(200)
-      .json({ message: "Doctor slots updated successfully" });
+      .json({ message: "Schedule updated successfully" });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -105,6 +130,8 @@ router.put("/updateSchedule", async (req, res, next) => {
     next(error);
   }
 });
+
+
 
 router.get("/profile/:email", async (req, res, next) => {
   try {
@@ -140,7 +167,7 @@ router.get('/myslots', async (req, res, next) => {
     }
 
     // Find the slots for the specified day
-    const slotsForDay = doctor.slots.find((slot) => slot.day === day);
+    const slotsForDay = doctor.aslots.find((slot) => slot.day === day);
 
     if (!slotsForDay) {
       return res.status(404).json({ error: `No slots found for ${day}.` });

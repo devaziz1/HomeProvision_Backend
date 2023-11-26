@@ -168,8 +168,20 @@ router.post(
 
 router.post("/createAppointment", async (req, res, next) => {
   try {
-    const { email, doctorEmail, slot,type,createdAt } = req.body;
+    const { email, doctorEmail, slot, type, createdAt, day } = req.body;
     console.log(doctorEmail);
+
+    // Check the number of existing pending appointments for the patient
+    const existingAppointmentsCount = await Appointment.countDocuments({
+      email: email,
+      status: "Pending", // You may adjust this condition based on your specific logic
+    });
+
+    // Limit the patient to five appointments
+    if (existingAppointmentsCount >= 5) {
+      return res.status(400).json({ error: "You can only book up to five appointments at a time." });
+    }
+
     const patient = await Patient.findOne({ email });
 
     if (!patient) {
@@ -177,6 +189,7 @@ router.post("/createAppointment", async (req, res, next) => {
       error.statuscode = 401;
       throw error;
     }
+
     const doctor = await Doctor.findOne({ email: doctorEmail });
     if (!doctor) {
       const error = new Error("Doctor Does not exist");
@@ -184,13 +197,15 @@ router.post("/createAppointment", async (req, res, next) => {
       throw error;
     }
 
-    // Remove the booked slot from doctor's timings
-    doctor.slots = doctor.slots.map((docSlot) => {
-      if (docSlot.timings.includes(slot)) {
-        docSlot.timings = docSlot.timings.filter((time) => time !== slot);
-      }
-      return docSlot;
-    });
+    // Find the day in the aslots array
+    const selectedDayIndex = doctor.aslots.findIndex((slotDay) => slotDay.day === day);
+
+    if (selectedDayIndex !== -1) {
+      // Update the timings array for the selected day
+      doctor.aslots[selectedDayIndex].timings = doctor.aslots[selectedDayIndex].timings.filter(
+        (time) => time !== slot
+      );
+    }
 
     // Save the updated doctor information
     await doctor.save();
@@ -206,14 +221,14 @@ router.post("/createAppointment", async (req, res, next) => {
       type,
       doctorEmail,
       DoctorName,
-      slot
+      slot,
     });
 
     await app.save();
-    console.log("Appiontment Done Sucessfully");
+    console.log("Appointment Done Successfully");
 
     res.status(200).json({
-      message: "Appointment Booked Sucessfully",
+      message: "Appointment Booked Successfully",
     });
   } catch (error) {
     if (error.code === 11000) {
@@ -228,6 +243,7 @@ router.post("/createAppointment", async (req, res, next) => {
     next(error);
   }
 });
+
 
 router.get("/getAllDoctor/:adminId", async (req, res, next) => {
   try {

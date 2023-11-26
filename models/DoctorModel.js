@@ -65,6 +65,19 @@ const doctorSchema=new Schema({
           },
         ],
       },
+    ],
+    aslots: [
+      {
+        day: {
+          type: String,
+          enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+        },
+        timings: [
+          {
+            type: String,
+          },
+        ],
+      },
     ]
     
 });
