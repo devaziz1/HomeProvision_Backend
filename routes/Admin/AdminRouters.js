@@ -11,6 +11,7 @@ const Doctor = require("../../models/DoctorModel");
 const Patient = require("../../models/PatientModel");
 const Complaint = require("../../models/Complaints");
 const PatientReport = require("../../models/PatientReport");
+const MReports = require("../../models/MonthlyReports");
 
 const adminController = require("../../controller/adminController");
 const { body, validationResult } = require("express-validator");
@@ -200,9 +201,8 @@ router.post(
         error.statuscode = 401;
         throw error;
       } else {
-        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+        const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
         const slots = days.map((day) => {
-         
           const daySlots = [
             "9:00 - 9:30 AM",
             "9:30 - 10:00 AM",
@@ -219,7 +219,7 @@ router.post(
             "3:00 - 3:30 PM",
             "3:30 - 4:00 PM",
           ];
-    
+
           return {
             day,
             timings: daySlots,
@@ -324,7 +324,6 @@ router.get("/doctor/search/:email", async (req, res, next) => {
       error.statuscode = 401;
       throw error;
     }
-
 
     res.status(200).json(doctor);
   } catch (error) {
@@ -593,7 +592,7 @@ router.patch("/updateProfile", async (req, res) => {
       throw error;
     }
 
-    console.log(admin)
+    console.log(admin);
 
     console.log("Old Password " + oldpassword);
     console.log("New " + newPass);
@@ -616,7 +615,6 @@ router.patch("/updateProfile", async (req, res) => {
   }
 });
 
-
 router.get("/dashboardDetails", async (req, res, next) => {
   try {
     console.log("Inside dashbord details");
@@ -624,31 +622,96 @@ router.get("/dashboardDetails", async (req, res, next) => {
     const admin = await Admin.findOne({ email: "NephrolAI@gmail.com" });
 
     if (!admin) {
-      return res.status(404).json({ error: 'Admin not found' });
+      return res.status(404).json({ error: "Admin not found" });
     }
 
     // Count the number of patients and doctors associated with the admin
     const totalPatients = admin.patients.length;
     const totalDoctors = admin.doctors.length;
+    const monthlyReports = await MReports.aggregate([
+      {
+        $group: {
+          _id: {
+            month: { $month: "$reportDate" },
+            year: { $year: "$reportDate" },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { "_id.year": -1, "_id.month": -1 },
+      },
+    ]);
 
-    // Return the result as JSON
-    res.json({ totalPatients, totalDoctors });
-    
+    const resultArray = Array.from({ length: 12 }, (_, index) => {
+      const matchedMonth = monthlyReports.find(
+        (item) =>
+          item._id.month === (index + 1) && item._id.year === new Date().getFullYear()
+      );
+
+      return matchedMonth ? matchedMonth.count : 0;
+    });
+
+    res.status(200).json({ totalPatients, totalDoctors, resultArray });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 });
 
+router.post("/updateMonthlyReport", async (req, res) => {
+  try {
+    // Create a new monthly report with the current date
+    const newMonthlyReport = new MReports({
+      reportDate: new Date()
+    });
+
+    // Save the new monthly report to the database
+    await newMonthlyReport.save();
+
+    res.status(200).json({ message: "Current date stored successfully." });
+  } catch (error) {
+    console.error("Error storing current date:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.get("/getMonthlyReportCounts", async (req, res) => {
+  try {
+    const monthlyReports = await MReports.aggregate([
+      {
+        $group: {
+          _id: {
+            month: { $month: "$reportDate" },
+            year: { $year: "$reportDate" },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { "_id.year": -1, "_id.month": -1 },
+      },
+    ]);
+
+    const resultArray = Array.from({ length: 12 }, (_, index) => {
+      const matchedMonth = monthlyReports.find(
+        (item) =>
+          item._id.month === (index + 1) && item._id.year === new Date().getFullYear()
+      );
+
+      return matchedMonth ? matchedMonth.count : 0;
+    });
+
+    res.status(200).json(resultArray);
+  } catch (error) {
+    console.error("Error getting monthly report counts:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 router.get("/getAllPatient/:adminId", adminController.getAllPatient);
 router.delete("/patient/delete/:email", adminController.deletePatient);
 
 router.get("/getAllComplaints", adminController.getAllComaplints);
-
-
-
 
 module.exports = router;

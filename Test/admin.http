@@ -172,3 +172,9 @@ Content-Type: application/json
     "oldpassword":"admin",
     "newPass":"admin23"
 }
+
+############# Update Monthly reports
+POST http://localhost:8080/admin/updateMonthlyReport
+
+############# GET Monthly reports Date
+GET http://localhost:8080/admin/getMonthlyReportCounts

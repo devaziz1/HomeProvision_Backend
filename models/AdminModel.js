@@ -28,7 +28,7 @@ const adminSchema = new Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: "Doctor",
     },
-  ],
+  ]
 });
 
 module.exports = mongoose.model("Admin", adminSchema);

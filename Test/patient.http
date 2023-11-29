@@ -112,6 +112,10 @@ Content-Type: application/json
 
 }
 
+##################### update Pstient
+PATCH http://localhost:8080/patient/cancelApp/6564e1e3247ca10e39cab793
+
+
 ############# Doctor Get Appiontments
 GET http://localhost:8080/patient/appiontments/UzairAziz4893@gmail.com
 

@@ -170,7 +170,7 @@ router.post(
 router.post("/createAppointment", async (req, res, next) => {
   try {
     const { email, doctorEmail, slot, type, createdAt, day } = req.body;
-    console.log(doctorEmail);
+   
 
     // Check the number of existing pending appointments for the patient
     const existingAppointmentsCount = await Appointment.countDocuments({
@@ -383,14 +383,38 @@ router.delete("/deleteApp/:_id", async (req, res, next) => {
   }
 });
 
-router.delete("/cancelApp/:_id", async (req, res, next) => {
+// Function to get the day from a given date
+function getDayFromDate(date) {
+  const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const appointmentDate = new Date(date);
+  return daysOfWeek[appointmentDate.getDay()];
+}
+
+router.post("/cancelApp/:_id", async (req, res, next) => {
   try {
+    console.log("Inside cancel app");
     const { _id } = req.params;
-    const appointment = await Appointment.findByIdAndDelete(_id);
+    const appointment = await Appointment.findById(_id);
 
     if (appointment) {
-      res.status(200).json({ message: "Appointment cancel sucessful" });
-      console.log("appointment cancelled");
+      // Extract information from the canceled appointment
+      const { slot, createdAt, doctorEmail } = appointment;
+
+      // Find the day corresponding to the appointment creation date
+      const day = getDayFromDate(createdAt);
+
+      // Update the doctor's aslots with the canceled slot
+      await Doctor.findOneAndUpdate(
+        { email: doctorEmail, "aslots.day": day },
+        { $push: { "aslots.$.timings": slot } }
+      );
+
+      // Remove the canceled appointment
+      await Appointment.findByIdAndRemove(_id);
+
+      res.status(200).json({ message: "Appointment canceled successfully" });
+    } else {
+      res.status(404).json({ error: "Appointment not found" });
     }
   } catch (error) {
     console.error(error);
