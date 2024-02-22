@@ -1,15 +1,12 @@
 require("dotenv").config();
-const path = require("path");
+
 const express = require("express");
 var bodyParser = require("body-parser");
 const { default: mongoose } = require("mongoose");
 const cors = require("cors");
-var session = require("express-session");
-// var FileStore = require("session-file-store")(session);
-const adminRoute = require("./routes/Admin/AdminRouters");
-const doctorRoute = require("./routes/Doctor/DoctorRouters");
-const patientRouter = require("./routes/Patient/PatientRouters");
-// const sessions = require("./models/sessionModel");
+
+const user = require("./routes/userRouters");
+
 
 const port = 8080;
 const app = express();
@@ -33,24 +30,9 @@ app.use(cors({
 }));
 
 
-// app.use((req, res, next) => {
-//   res.setHeader(
-//     "Access-Control-Allow-Methods",
-//     "OPTIONS, GET, POST, PUT, PATCH, DELETE"
-//   );
-//   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-//   next();
-// });
-
-// // Use the cors middleware and allow requests from http://127.0.0.1:5000
-// app.use(cors({
-//   origin: "http://127.0.0.1:5000",
-//   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-//   credentials: true,
-// }));
 
 mongoose
-  .connect("mongodb+srv://AzizNaseer:uzair493@nephrolai.twwwqs6.mongodb.net/")
+  .connect("mongodb://localhost:27017/Home_Provision")
   .then(() => {
     app.listen(port, () => {
       console.log("App is runing");
@@ -60,11 +42,7 @@ mongoose
     console.log(err);
   });
 
-
-
-app.use("/admin", adminRoute);
-app.use("/doctor", doctorRoute);
-app.use("/patient", patientRouter);
+app.use("/user", user);
 
 
 
