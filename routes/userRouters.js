@@ -5,7 +5,7 @@ const argon2 = require("argon2");
 
 let jwt = require("jsonwebtoken");
 
-const Patient = require("../models/userModel");
+const User = require("../models/userModel");
 
 const { body, validationResult } = require("express-validator");
 
@@ -15,10 +15,32 @@ app.use(express.json());
 
 router.post("/signup", async (req, res, next) => {
   try {
-    console.log("I am here");
-    res.status(200).json({
-      message: "inside this API",
-    });
+    const {name, email, password, phone, address } = req.body;
+    console.log(req.body);
+
+    const hashedPassword = await argon2.hash(password);
+
+      const existingUser = await User.findOne({ email });
+
+      if(existingUser){
+       return res.status(401).json({
+         message: "User with this email already exists",
+       });
+      }
+
+      const newUser = new User({
+        name,
+        password: hashedPassword,
+        email,
+        address,
+        phone,
+      });
+
+      const result = await newUser.save();
+   return res.status(200).json({
+     message: "inside this API",
+     result,
+   });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -27,53 +49,32 @@ router.post("/signup", async (req, res, next) => {
   }
 });
 
-router.post(
-  "/login",
-  [
-    body("email")
-      .trim()
-      .notEmpty()
-      .withMessage("Email is required")
-      .isEmail()
-      .withMessage("Enter a valid email"),
-    body("password").trim().notEmpty().withMessage("Password is required"),
-  ],
-  async (req, res, next) => {
+router.post("/login", async (req, res, next) => {
     try {
       console.log(req.body);
-      const err = validationResult(req);
-      if (!err.isEmpty()) {
-        const error = new Error("Validation Failed");
-        error.statusCode = 422;
-        error.data = err.array();
-        throw error;
-      }
+
 
       const { email, password } = req.body;
-      const patient = await Patient.findOne({ email });
-      console.log(patient);
-      const token = jwt.sign({ patient }, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "300s",
-      });
+      const user = await User.findOne({ email });
+      
 
-      if (!patient) {
-        const error = new Error("Invalid Email!");
-        error.statuscode = 401;
-        throw error;
+      if (!user) {
+      return res.status(401).json({
+        message: "Invalid Email Address",
+      });
       } else {
-        const passwordMatches = await argon2.verify(patient.password, password);
+        const passwordMatches = await argon2.verify(user.password, password);
 
         if (!passwordMatches) {
-          const error = new Error("Invalid Password!");
-          error.statuscode = 401;
-          throw error;
+         return res.status(401).json({
+           message: "Invalid Password",
+         });
         }
-        const name = patient.name;
-        res.status(200).json({
+        const name = user.name;
+       return res.status(200).json({
           email,
           name,
-          message: "Patient Login sucessfull ",
-          token,
+          message: "user Login sucessfull ",
         });
       }
     } catch (error) {

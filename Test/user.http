@@ -4,34 +4,23 @@ POST http://localhost:8080/user/signup
 Content-Type: application/json
 
 {
-     
-
+    "name": "John",
+    "password": "12345",
+    "email": "john11@gmail.com",
+    "address": "12345",
+    "phone": "12345"
 }
 
 
 ############# Patient login
-POST http://localhost:8080/patient/login
+POST http://localhost:8080/user/login
 Content-Type: application/json
 
 {
-"email":"waqassaleem99@gmail.com",
-"password":"waqas123"
+"email":"john11@gmail.com",
+"password":"1345"
 }
 
 
 
 
-# const handleSignUp = async () => {
-#   try {
-#     const response = await axios.post(
-#       "http://192.168.18.21:8080/user/signup"
-#       // You can pass any data you want to send along with the request in the second parameter
-#       // Example: { username: 'example', password: 'password' }
-#     );
-#     console.log(response.data);
-#     // Handle response here
-#   } catch (error) {
-#     console.error("Error signing up:", error);
-#     // Handle error here
-#   }
-# };

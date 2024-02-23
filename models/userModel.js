@@ -13,21 +13,12 @@ const UserSchema = new Schema({
     match: [gmailRegex, "Please enter a valid Gmail address"],
   },
   password: { type: String, required: true, minLength: 4 },
-  medical_history: {
+  address: {
     type: String,
   },
-  gender: {
+  phone: {
     type: String,
     required: true,
-  },
-  phoneNumber: {
-    type: String,
-    required: true,
-  },
-  verified: {
-    type: Boolean,
-    required: true,
-    default: false,
   },
 });
 module.exports=mongoose.model("User",UserSchema);
